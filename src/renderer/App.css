@@ -1,0 +1,181 @@
+html {
+  --color-background: #333333;
+  --color-background-darker: #222222;
+  --color-primary: blue;
+  --color-text: white;
+  --color-text-disabled: #999999;
+  --color-borders: #444444;
+
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+html[data-theme='light'] {
+  --color-background: white;
+  --color-background-darker: #eeeeee;
+  --color-primary: blue;
+  --color-text: black;
+}
+
+div {
+  color: var(--color-text);
+}
+
+input {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-borders) !important;
+  color: var(--color-text) !important;
+}
+
+input:focus {
+  border-color: var(--color-borders) !important;
+  box-shadow: 0 0 0 !important;
+  outline: 0 none !important;
+}
+
+input::placeholder {
+  color: var(--color-text-disabled) !important;
+}
+
+button {
+  border-color: var(--color-borders) !important;
+  color: var(--color-text) !important;
+}
+
+.btn-borderless {
+  border: none !important;
+}
+
+.btn:hover {
+  background-color: var(--color-borders) !important;
+}
+
+.bg-darker {
+  background-color: var(--color-background-darker) !important;
+}
+
+.w-95 {
+  width: 95% !important;
+}
+
+.border-rounded {
+  border-radius: 15px !important;
+  border: var(--color-borders) solid !important;
+}
+
+.bg {
+  background-color: var(--color-background) !important;
+}
+
+.w-24 {
+  width: 24% !important;
+}
+
+.w-15 {
+  width: 15% !important;;
+}
+
+.w-20 {
+  width: 20% !important;;
+}
+
+.message-input {
+  border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius) !important;
+}
+
+.btn-message-input {
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0 !important;
+}
+
+.min-w50 {
+  min-width: 50% !important;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.scrollable {
+  overflow-y: auto;
+}
+
+.btn-sidebar {
+  background-color: var(--color-background-darker);
+  border: none;
+}
+
+.btn-sidebar-selected {
+  background-color: var(--color-background);
+}
+
+.table td {
+  color: var(--color-text) !important;
+  background-color: var(--color-background) !important;
+  border-color: var(--color-borders) !important;
+}
+
+.table th {
+  color: var(--color-text) !important;
+  background-color: var(--color-background) !important;
+  border-color: var(--color-borders) !important;
+  border-bottom: var(--color-borders) solid 2px !important;
+}
+
+.table-darker td {
+  background-color: var(--color-background-darker) !important;
+}
+
+.table-darker th {
+  background-color: var(--color-background-darker) !important;
+}
+
+.table-selectable tr:hover td{
+  background-color: var(--color-background-darker) !important;
+}
+
+.table-row-selected td {
+  background-color: var(--color-background-darker) !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.px-6 {
+  padding-right: 6.25rem !important;
+  padding-left: 6.25rem !important;
+}
+
+.min-h0 {
+  min-height: 0 !important;
+}
+
+.flex-1 {
+  flex: 1 !important;
+}
+
+@media (min-width: 768px) {
+  .h-md-100 {
+    height: 100% !important;
+  }
+
+  .w-md-20 {
+    width: 20% !important;
+  }
+
+  .overflow-md-hidden {
+    overflow: hidden !important;
+  }
+
+  .overflow-md-auto {
+    overflow: auto !important;
+  }
+}

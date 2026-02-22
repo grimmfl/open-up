@@ -1,4 +1,4 @@
-import {WebSocket, WebSocketServer} from 'ws';
+import {RawData, WebSocket, WebSocketServer} from 'ws';
 import {
   SignalingClientId,
   SignalingCreateRoom,
@@ -11,16 +11,31 @@ import {
   SignalingPeerList
 } from "../messages";
 import {generateRoomCode} from "../../../shared/room-code-generator";
+import {Buffer} from "buffer";
 
 interface ClientInfo {
   socket: WebSocket;
   roomId: string | null;
 }
 
+enum CustomCloseCodes {
+  UNKNOWN_ORIGIN = 4000,
+  INVALID_MESSAGE = 4002,
+  TOO_MANY_CONNECTIONS = 4029,
+  RATE_LIMIT_EXCEEDED = 4030
+}
+
+const MaxMessageSize = 10000; // bytes
+const MaxConnectionsPerIp = 10;
+const MaxMessagesPerSeconds = 20;
+
+
 const server = new WebSocketServer({port: 3000});
 
-const clients = new Map<string, ClientInfo>();
-const rooms = new Map<string, string[]>();
+const connectionCounts = new Map<string, number>(); // ip to count
+
+const clients = new Map<string, ClientInfo>(); // client id to info
+const rooms = new Map<string, string[]>(); // room id to client ids
 const roomCodeToId = new Map<string, string>();
 const roomIdToCode = new Map<string, string>();
 
@@ -169,13 +184,25 @@ function handleMessage(message: SignalingMessage, socket: WebSocket) {
       leaveRoom(message as SignalingLeaveRoom, sender);
       break;
 
-    default:
+    case SignalingMessageType.Offer:
+    case SignalingMessageType.Answer:
+    case SignalingMessageType.IceCandidate:
       forwardMessage(message);
-      break
+      break;
+
+    default:
+      socket.close(CustomCloseCodes.INVALID_MESSAGE, 'Invalid message type')
+      return;
   }
 }
 
-function removeClient(clientId: string) {
+function removeClient(clientId: string, ip: string | undefined) {
+  if (ip == null) return;
+
+  const count = (connectionCounts.get(ip) ?? 0) - 1;
+  if (count <= 0) connectionCounts.delete(ip);
+  else connectionCounts.set(ip, count);
+
   clients.delete(clientId);
 
   // TODO maybe make a map client -> room for more efficient access
@@ -198,7 +225,40 @@ function removeClient(clientId: string) {
   console.log(`Client ${clientId} disconnected.`);
 }
 
-server.on('connection', socket => {
+function checkMessageSize(buffer: RawData, socket: WebSocket) {
+  const size = Array.isArray(buffer)
+      ? buffer.reduce((sum, b) => sum + Buffer.byteLength(b), 0)
+      : Buffer.byteLength(buffer);
+
+  if (size > MaxMessageSize) {
+    socket.close(1009, 'Message too large');
+    return false;
+  }
+
+  return true;
+}
+
+function checkConnectionCount(socket: WebSocket, ip: string | undefined) {
+  if (ip == null) {
+    socket.close(CustomCloseCodes.UNKNOWN_ORIGIN, 'Unable to determine client address.');
+    return false;
+  }
+
+  const count = connectionCounts.get(ip) ?? 0;
+
+  if (count > MaxConnectionsPerIp) {
+    socket.close(CustomCloseCodes.TOO_MANY_CONNECTIONS, 'Too many connections.');
+    return false;
+  }
+
+  connectionCounts.set(ip, count + 1);
+
+  return true;
+}
+
+server.on('connection', (socket, request) => {
+  if (!checkConnectionCount(socket, request.socket.remoteAddress)) return;
+
   const clientId = crypto.randomUUID().toString();
 
   clients.set(clientId, {
@@ -210,8 +270,35 @@ server.on('connection', socket => {
 
   socket.send(new SignalingClientId(clientId, '', clientId).toBuffer());
 
+  let messageCount = 0;
+  let resetAt = Date.now() + 1000;
+
   socket.on('message', async buffer => {
-    const messages = await SignalingMessage.parseMessage(buffer);
+    const now = Date.now();
+
+    if (now > resetAt) {
+      messageCount = 0;
+      resetAt = now;
+    }
+
+    if (messageCount > MaxMessagesPerSeconds) {
+      socket.close(CustomCloseCodes.RATE_LIMIT_EXCEEDED, 'Rate limit exceeded.');
+      return;
+    }
+
+    messageCount++;
+
+    if (!checkMessageSize(buffer, socket)) return;
+
+    let messages: SignalingMessage[];
+
+    try {
+      messages = await SignalingMessage.parseMessage(buffer);
+    } catch (error) {
+      console.error(error);
+      socket.close(CustomCloseCodes.INVALID_MESSAGE, 'Invalid message');
+      return;
+    }
 
     for (const message of messages) {
       handleMessage(message, socket);
@@ -219,6 +306,6 @@ server.on('connection', socket => {
   });
 
   socket.on('close', () => {
-    removeClient(clientId);
+    removeClient(clientId, request.socket.remoteAddress);
   })
 });

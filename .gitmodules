@@ -1,0 +1,3 @@
+[submodule "src/rtc/signaling"]
+	path = src/rtc/signaling
+	url = https://github.com/grimmfl/open-up-signaling

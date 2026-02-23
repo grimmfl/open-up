@@ -11,8 +11,7 @@
     "overrides": [
       {
         "files": [
-          ".prettierrc",
-          ".eslintrc"
+          ".prettierrc"
         ],
         "options": {
           "parser": "json"
@@ -27,20 +26,6 @@
     "@roamhq/wrtc": "^0.9.1",
     "@types/node": "22.13.10",
     "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^8.26.1",
-    "@typescript-eslint/parser": "^8.26.1",
-    "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-erb": "^4.1.0",
-    "eslint-import-resolver-typescript": "^4.1.1",
-    "eslint-import-resolver-webpack": "^0.13.10",
-    "eslint-plugin-compat": "^6.0.2",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.11.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-promise": "^7.2.1",
-    "eslint-plugin-react": "^7.37.4",
-    "eslint-plugin-react-hooks": "^5.2.0",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",

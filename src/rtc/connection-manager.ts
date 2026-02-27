@@ -59,9 +59,11 @@ export class RTCConnectionManager {
   private remoteStreamEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>();
   private messageEventListeners = new Map<SignalingMessageType | null, Map<string, ((event: RTCEvent, callbackId: string) => void)>>();
 
-  private client = new SignalingClient();
+  private client;
 
-  constructor() {
+  constructor(url: string) {
+    this.client = new SignalingClient(url);
+
     this.client.onMessage(async event => {
       await this.handleMessageEvent(event);
     });

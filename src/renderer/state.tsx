@@ -65,7 +65,7 @@ export default function State({children}: { children: ReactElement }) {
       setAudioInputDeviceId(prev => prev != null ? prev : getDefaultDevice(allDevices, 'audioinput'));
       setAudioOutputDeviceId(prev => prev != null ? prev : getDefaultDevice(allDevices, 'audiooutput'));
 
-      const connectionManager = new RTCConnectionManager();
+      const connectionManager = new RTCConnectionManager(window.signalingUrl);
       const messageHandler = new RTCMessageHandler();
 
       messageHandler.addChatEventListener((sender, message) => {

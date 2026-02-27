@@ -13,6 +13,8 @@ import ErrorDisplay from "./ErrorDisplay";
 function Hello() {
   const [sidebarValue, setSidebarValue] = useState<SidebarValue>('home');
 
+  console.log('signaling', window.signalingUrl);
+
 
   function getWindow() {
     switch (sidebarValue) {

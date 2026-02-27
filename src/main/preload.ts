@@ -25,5 +25,6 @@ const electronHandler = {
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
+contextBridge.exposeInMainWorld('signalingUrl', process.env.SIGNALING_URL);
 
 export type ElectronHandler = typeof electronHandler;

@@ -14,10 +14,14 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import {load, PersistenceData, save} from "./persistence";
+import {load, save} from "./persistence";
+import dotenv from 'dotenv';
+
+console.log('Hallooooooooooooo');
 
 class AppUpdater {
   constructor() {
+    // TODO fix auto updates
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
@@ -138,6 +142,11 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    const envPath = app.isPackaged
+      ? path.join(process.resourcesPath, '.env')
+      : path.join(__dirname, '../.env');
+    dotenv.config({ path: envPath });
+
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

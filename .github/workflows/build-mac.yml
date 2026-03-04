@@ -19,7 +19,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v6
@@ -55,8 +55,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
-          file: release/build/OpenUp-${{ steps.get-version.outputs.version }}.exe
-          asset_name: OpenUp-${{ steps.get-version.outputs.version }}.exe
+          file: release/build/OpenUp-${{ steps.get-version.outputs.version }}.dmg
+          asset_name: OpenUp-${{ steps.get-version.outputs.version }}.dmg
           tag: ${{ github.ref }}
           overwrite: true
           body: ""

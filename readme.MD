@@ -1,5 +1,5 @@
 ## Open Up - An Open Voice Chat
-Open Up is a free, privacy-first and open-source voice chat based on WebRTC.
+Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.
 
 ### Download
 

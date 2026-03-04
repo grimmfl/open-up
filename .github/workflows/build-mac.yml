@@ -1,4 +1,4 @@
-name: Build Release - Windows
+name: Build Release - Mac
 
 permissions:
   contents: write
@@ -58,8 +58,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
-          file: release/build/OpenUp-${{ steps.get-version.outputs.version }}.dmg
-          asset_name: OpenUp-${{ steps.get-version.outputs.version }}.dmg
+          file: release/build/OpenUp.dmg
+          asset_name: OpenUp.dmg
           tag: ${{ github.ref }}
           overwrite: true
           body: ""

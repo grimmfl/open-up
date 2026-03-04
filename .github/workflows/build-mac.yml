@@ -46,7 +46,7 @@ jobs:
         run: npm run build
 
       - name: Build Electron
-        run: npm run app:dist
+        run: electron-builder --mac --arm64
 
       - name: Show DIR
         run: ls release/build

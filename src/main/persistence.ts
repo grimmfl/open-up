@@ -30,7 +30,11 @@ export function load(): PersistenceData | null {
 }
 
 function getDataPath() {
-  let dirPath;
+  return app.getAppPath();
+
+  /*let dirPath;
+
+  app.getAppPath()
 
   switch (process.platform) {
     case 'darwin':
@@ -49,5 +53,5 @@ function getDataPath() {
     fs.mkdirSync(dirPath);
   }
 
-  return dirPath;
+  return dirPath;*/
 }

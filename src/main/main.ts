@@ -17,8 +17,6 @@ import { resolveHtmlPath } from './util';
 import {load, save} from "./persistence";
 import dotenv from 'dotenv';
 
-console.log('Hallooooooooooooo');
-
 class AppUpdater {
   constructor() {
     // TODO fix auto updates

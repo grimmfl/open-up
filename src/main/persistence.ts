@@ -30,9 +30,9 @@ export function load(): PersistenceData | null {
 }
 
 function getDataPath() {
-  return app.getAppPath();
+  // app.getAppPath();
 
-  /*let dirPath;
+  let dirPath;
 
   app.getAppPath()
 
@@ -53,5 +53,5 @@ function getDataPath() {
     fs.mkdirSync(dirPath);
   }
 
-  return dirPath;*/
+  return dirPath;
 }

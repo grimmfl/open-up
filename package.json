@@ -1,6 +1,6 @@
 {
   "name": "openup",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "license": "MIT",
   "main": "./.erb/dll/main.bundle.dev.js",
   "scripts": {
@@ -112,7 +112,7 @@
   },
   "build": {
     "productName": "OpenUp",
-    "artifactName": "OpenUp-${version}.${ext}",
+    "artifactName": "OpenUp.${ext}",
     "appId": "grimmfl.OpenUp",
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",

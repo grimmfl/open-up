@@ -43,10 +43,10 @@ jobs:
           path: .
 
       - name: Build Frontend
-        run: npm run build
+        run: SIGNALING_URL=${{ secrets.SIGNALING_URL }} npm run build
 
       - name: Build Electron
-        run: npm run app:dist
+        run: SIGNALING_URL=${{ secrets.SIGNALING_URL }} npm run app:dist
 
       - name: Show DIR
         run: ls release/build

@@ -113,6 +113,8 @@
   "build": {
     "productName": "OpenUp",
     "artifactName": "OpenUp-${version}.${ext}",
+    "author": "Felix Grimm",
+    "description": "An Open Voice Chat",
     "appId": "grimmfl.OpenUp",
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",

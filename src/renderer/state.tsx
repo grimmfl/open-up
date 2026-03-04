@@ -189,7 +189,10 @@ export default function State({children}: { children: ReactElement }) {
                 setUserNameInput
               }}>
                 <AudioManager>
-                  {children}
+                  <div className="bg">
+                    { window.signalingUrl }
+                    {children}
+                  </div>
                 </AudioManager>
               </UserInfoSettingsContext>
             </UserContext>

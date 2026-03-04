@@ -2,7 +2,7 @@
 
 ### Download
 
-| OS                                                                                | Auto Updates |
+| OS                                                                                | Auto Update |
 |-----------------------------------------------------------------------------------|--------------|
 | [Windows](https://github.com/grimmfl/open-up/releases/latest/download/OpenUp.exe) | ✅ Yes        |
 | [Mac OS](https://github.com/grimmfl/open-up/releases/latest/download/OpenUp.dmg)  | ❌ No         |

@@ -6,7 +6,7 @@ permissions:
   checks: write
 
 on:
-  workflow-call:
+  workflow_call:
     secrets:
       NUGET_AUTH_TOKEN:
         required: true

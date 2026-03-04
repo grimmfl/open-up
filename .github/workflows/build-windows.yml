@@ -8,7 +8,7 @@ permissions:
 on:
   workflow_call:
     secrets:
-      NUGET_AUTH_TOKEN:
+      SIGNALING_URL:
         required: true
 
 env:

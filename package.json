@@ -112,6 +112,7 @@
   },
   "build": {
     "productName": "OpenUp",
+    "artifactName": "OpenUp-${version}.${ext}",
     "appId": "grimmfl.OpenUp",
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",

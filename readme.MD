@@ -9,7 +9,7 @@ Open Up is a free, privacy-first and open-source voice chat based on WebRTC.
 | [Mac OS](https://github.com/grimmfl/open-up/releases/latest/download/OpenUp.dmg)  | ❌ No         |
 
 ### Notes
-The app is not signed, as this costs at least 70$ per year per OS.
+The app is not signed, because certificates cost at least 70$ per year per OS.
 
 Because of that, you will probably receive a Windows Defender warning on Windows.
 

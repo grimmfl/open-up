@@ -45,7 +45,7 @@ export default function State({children}: { children: ReactElement }) {
   // ---------------------- UserInfoSettingsContext ----------------------
   const [userNameInput, setUserNameInput] = useState<string>('');
 
-  const informationRef = useRef({ name: userName, clientId: clientId ?? '' } as PeerInformation);
+  const informationRef = useRef({name: userName, clientId: clientId ?? ''} as PeerInformation);
 
   useEffect(() => {
     window.electron.ipcRenderer.on('load-data', input => {
@@ -121,7 +121,7 @@ export default function State({children}: { children: ReactElement }) {
 
     setUserNameInput(userName);
 
-    informationRef.current = { name: userName, clientId: clientId ?? '' };
+    informationRef.current = {name: userName, clientId: clientId ?? ''};
 
     rtcMessageHandler.sendInformation(informationRef.current);
   }, [userName, clientId]);
@@ -189,10 +189,7 @@ export default function State({children}: { children: ReactElement }) {
                 setUserNameInput
               }}>
                 <AudioManager>
-                  <div className="bg">
-                    { window.signalingUrl }
-                    {children}
-                  </div>
+                  {children}
                 </AudioManager>
               </UserInfoSettingsContext>
             </UserContext>

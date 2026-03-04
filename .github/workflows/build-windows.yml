@@ -1,0 +1,57 @@
+name: Build Release - Windows
+
+permissions:
+  contents: write
+  statuses: write
+  checks: write
+
+on:
+  workflow-call:
+    secrets:
+      NUGET_AUTH_TOKEN:
+        required: true
+
+env:
+  SIGNALING_URL: ${{ secrets.SIGNALING_URL }}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      versionSemVer: ${{ steps.gitversion.outputs.semVer }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3
+        with:
+          versionSpec: "5.x"
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v3
+        id: gitversion
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Build Electron
+        run: npm run app:dist
+
+      - name: Show DIR
+        run: ls release/build
+

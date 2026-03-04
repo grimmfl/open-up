@@ -22,7 +22,22 @@ class AppUpdater {
     // TODO fix auto updates
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
+
+    autoUpdater.on('update-available', (info) => {
+      autoUpdater.downloadUpdate();
+    });
+
+    autoUpdater.on('update-not-available', () => {
+      console.log('App is up to date');
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+      autoUpdater.quitAndInstall();
+    });
+
+    autoUpdater.on('error', (err) => {
+      console.error('Update error:', err);
+    });
   }
 }
 
@@ -151,5 +166,7 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
+
+    autoUpdater.checkForUpdates();
   })
   .catch(console.log);

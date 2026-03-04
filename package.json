@@ -22,7 +22,7 @@
     "start:server": "ts-node src/rtc/signaling/server/main.ts",
     "start:client:create": "ts-node src/rtc/main.ts mode=create code=1234",
     "start:client:join": "ts-node src/rtc/main.ts mode=join code=1234",
-    "app:dist": "electron-builder"
+    "app:dist": "electron-builder --publish always"
   },
   "browserslist": [
     "extends browserslist-config-erb"

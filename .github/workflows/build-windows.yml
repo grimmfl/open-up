@@ -48,8 +48,8 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
-      - name: Build Electron
-        run: electron-builder --publish always
+      - name: Publish Electron
+        run: npm run app:dist
 
       #- name: Show DIR
       #  run: ls release/build

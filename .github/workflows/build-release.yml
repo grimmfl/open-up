@@ -14,6 +14,7 @@ on:
 
 env:
   SIGNALING_URL: ${{ secrets.SIGNALING_URL }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
   build-windows:

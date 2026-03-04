@@ -33,14 +33,14 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
 
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
       - name: get-npm-version
         id: get-version
         uses: beaconbrigade/package-json-version@v0.3.2
         with:
           path: .
-
-      - name: Install Dependencies
-        run: npm ci --legacy-peer-deps
 
       - name: Write .env
         run: echo SIGNALING_URL=${{ secrets.SIGNALING_URL }} > .erb/.env

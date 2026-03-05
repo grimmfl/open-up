@@ -4,13 +4,13 @@ import {useState} from "react";
 export default function UpdateDisplay() {
   const [isManualUpdate, setIsManualUpdate] = useState(false);
 
-  window.electron.ipcRenderer.on('manual-update', event => {
+  window.electron.ipcRenderer.on('manual-update', () => {
     setIsManualUpdate(true);
   });
 
-  return (
+  return (isManualUpdate &&
     <div className="bg-infos p-2">
-      {isManualUpdate && <UpdateDisplayManual/>}
+      <UpdateDisplayManual/>
     </div>
   );
 }

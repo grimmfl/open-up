@@ -9,45 +9,22 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import {app, BrowserWindow, shell, ipcMain, ipcRenderer} from 'electron';
+import {autoUpdater} from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import {resolveHtmlPath} from './util';
 import {load, save} from "./persistence";
 import dotenv from 'dotenv';
 
 class AppUpdater {
   constructor() {
     // TODO fix auto updates
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
 
-    autoUpdater.on('update-available', (info) => {
-      autoUpdater.downloadUpdate();
-    });
-
-    autoUpdater.on('update-not-available', () => {
-      console.log('App is up to date');
-    });
-
-    autoUpdater.on('update-downloaded', () => {
-      autoUpdater.quitAndInstall();
-    });
-
-    autoUpdater.on('error', (err) => {
-      console.error('Update error:', err);
-    });
   }
 }
 
 let mainWindow: BrowserWindow | null = null;
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 ipcMain.on('load-data', async (event) => {
   const data = load();
@@ -132,12 +109,52 @@ const createWindow = async () => {
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
-    return { action: 'deny' };
+    return {action: 'deny'};
   });
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+};
+
+const checkForAutoUpdates = async () => {
+  log.transports.file.level = 'info';
+  autoUpdater.logger = log;
+
+  autoUpdater.on('update-available', (info) => {
+    autoUpdater.downloadUpdate();
+  });
+
+  autoUpdater.on('update-not-available', () => {
+    console.log('App is up to date');
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    autoUpdater.quitAndInstall();
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('Update error:', err);
+  });
+
+  autoUpdater.checkForUpdates();
+}
+
+const checkForManualUpdates = async () => {
+  const response = await fetch(
+    'https://api.github.com/repos/grimmfl/open-up/releases/latest'
+  );
+  const release = await response.json();
+
+  const latestVersion = release.tag_name.replace('v', '');
+  const currentVersion = app.getVersion();
+
+
+  if (latestVersion !== currentVersion) {
+    mainWindow?.webContents.on('did-finish-load', () => {
+      mainWindow?.webContents.send('manual-update');
+    });
+  }
 };
 
 /**
@@ -158,7 +175,7 @@ app
     const envPath = app.isPackaged
       ? path.join(process.resourcesPath, '.env')
       : path.join(__dirname, '../.env');
-    dotenv.config({ path: envPath });
+    dotenv.config({path: envPath});
 
     createWindow();
     app.on('activate', () => {
@@ -167,6 +184,10 @@ app
       if (mainWindow === null) createWindow();
     });
 
-    autoUpdater.checkForUpdates();
+    if (process.platform === 'win32') {
+      checkForAutoUpdates();
+    } else {
+      checkForManualUpdates();
+    }
   })
   .catch(console.log);

@@ -7,6 +7,7 @@ import Home from "./home/home";
 import Settings from "./settings/settings";
 import State from "./state";
 import ErrorDisplay from "./ErrorDisplay";
+import UpdateDisplay from "./update-display/update-display";
 
 
 
@@ -27,11 +28,14 @@ function Hello() {
 
   return (
     <State>
-      <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
-        <ErrorDisplay></ErrorDisplay>
-        <Sidebar onChange={setSidebarValue} initial={'home'}/>
-        <div className="flex-grow-1 p-4 p-md-5 vh-100 bg scrollable">
-          { getWindow() }
+      <div className="d-flex flex-column bg">
+        <UpdateDisplay/>
+        <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
+          <ErrorDisplay></ErrorDisplay>
+          <Sidebar onChange={setSidebarValue} initial={'home'}/>
+          <div className="flex-grow-1 p-4 p-md-5 vh-100 bg scrollable">
+            { getWindow() }
+          </div>
         </div>
       </div>
     </State>

@@ -7,7 +7,7 @@ import Home from "./home/home";
 import Settings from "./settings/settings";
 import State from "./state";
 import ErrorDisplay from "./ErrorDisplay";
-import UpdateDisplay from "./update-display/update-display";
+import {UpdateDisplay} from "./update-display/update-display";
 
 
 

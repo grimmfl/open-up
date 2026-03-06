@@ -1,6 +1,6 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import {contextBridge, ipcRenderer, IpcRendererEvent} from 'electron';
 
-export type Channels = 'load-data' | 'save-data' | 'manual-update';
+export type Channels = 'load-data' | 'save-data' | 'manual-update' | 'auto-update' | 'install' | 'install-on-quit';
 
 const electronHandler = {
   ipcRenderer: {

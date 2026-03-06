@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import {app, BrowserWindow, shell, ipcMain, ipcRenderer} from 'electron';
+import {app, BrowserWindow, shell, ipcMain} from 'electron';
 import {autoUpdater} from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -19,8 +19,6 @@ import dotenv from 'dotenv';
 
 class AppUpdater {
   constructor() {
-    // TODO fix auto updates
-
   }
 }
 
@@ -35,6 +33,14 @@ ipcMain.on('load-data', async (event) => {
 ipcMain.on('save-data', async (_, data) => {
   save(data);
 });
+
+ipcMain.on('install-on-quit', async () => {
+  autoUpdater.autoInstallOnAppQuit = true;
+});
+
+ipcMain.on('install', async () => {
+  autoUpdater.quitAndInstall(true, true);
+})
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -121,16 +127,12 @@ const checkForAutoUpdates = async () => {
   log.transports.file.level = 'info';
   autoUpdater.logger = log;
 
-  autoUpdater.on('update-available', (info) => {
+  autoUpdater.on('update-available', () => {
     autoUpdater.downloadUpdate();
   });
 
-  autoUpdater.on('update-not-available', () => {
-    console.log('App is up to date');
-  });
-
   autoUpdater.on('update-downloaded', () => {
-    autoUpdater.quitAndInstall();
+    mainWindow?.webContents.send('auto-update');
   });
 
   autoUpdater.on('error', (err) => {
@@ -149,11 +151,8 @@ const checkForManualUpdates = async () => {
   const latestVersion = release.tag_name.replace('v', '');
   const currentVersion = app.getVersion();
 
-
   if (latestVersion !== currentVersion) {
-    mainWindow?.webContents.on('did-finish-load', () => {
-      mainWindow?.webContents.send('manual-update');
-    });
+    mainWindow?.webContents.send('manual-update');
   }
 };
 
@@ -177,17 +176,21 @@ app
       : path.join(__dirname, '../.env');
     dotenv.config({path: envPath});
 
-    createWindow();
+    createWindow().then(() => {
+      mainWindow?.webContents.on('did-finish-load', () => {
+        if (process.platform === 'win32') {
+          checkForAutoUpdates();
+        } else {
+          checkForManualUpdates();
+        }
+      });
+    });
+
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
 
-    if (process.platform === 'win32') {
-      checkForAutoUpdates();
-    } else {
-      checkForManualUpdates();
-    }
   })
   .catch(console.log);

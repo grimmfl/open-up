@@ -24,6 +24,8 @@ export class RTCMessageHandler {
 
   send(message: RTCMessage) {
     for (const channel of this.chatChannels.values()) {
+      if (channel.readyState != 'open') continue;
+
       channel.send(JSON.stringify(message));
     }
   }

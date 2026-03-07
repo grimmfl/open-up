@@ -46,7 +46,8 @@ export default function MessageInput() {
     if (key === 'Control') setIsControlDown(true);
 
     if (isControlDown && key === 'v') {
-      handleImage();
+      // TODO because of message size limitations, we do not send images for now
+      // handleImage();
     }
 
     if (key === 'Enter') sendMessage();

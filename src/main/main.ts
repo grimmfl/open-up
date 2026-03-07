@@ -54,6 +54,10 @@ ipcMain.on('install', async () => {
   autoUpdater.quitAndInstall(true, true);
 });
 
+ipcMain.on('open-link', async (_, data) => {
+  await shell.openExternal(data);
+})
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();

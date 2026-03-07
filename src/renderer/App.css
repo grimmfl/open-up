@@ -258,3 +258,12 @@ progress::-webkit-progress-value {
 .ignore-blur {
   z-index: 101 !important;
 }
+
+.max-width {
+  max-width: 80%;
+}
+
+.wrap-text {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

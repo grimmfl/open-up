@@ -11,7 +11,7 @@ type Platform =
   | "sunos"
   | "win32"
   | "cygwin"
-  | "netbsd"
+  | "netbsd";
 
 declare global {
   // eslint-disable-next-line no-unused-vars

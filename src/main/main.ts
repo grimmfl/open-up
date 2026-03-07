@@ -195,6 +195,8 @@ app
 
     createWindow().then(() => {
       mainWindow?.webContents.on('did-finish-load', () => {
+        mainWindow?.webContents.send('version', app.getVersion());
+
         if (process.platform === 'win32') {
           checkForAutoUpdates();
         } else {

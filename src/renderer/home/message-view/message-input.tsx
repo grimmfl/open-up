@@ -58,7 +58,7 @@ export default function MessageInput() {
 
   function sendImages() {
     for (const image of images) {
-      rtcMessageHandler!.send(image);
+      rtcMessageHandler!.send({ message: image, type: 'image'});
       setMessageList(prev => [
         ...prev,
         {
@@ -82,7 +82,7 @@ export default function MessageInput() {
 
     const message = messageInput;
 
-    rtcMessageHandler.send(message);
+    rtcMessageHandler.send({ message, type: 'text' });
 
     setMessageList(prev => [...prev, {
       message,

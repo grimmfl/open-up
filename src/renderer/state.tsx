@@ -1,5 +1,5 @@
 import {ReactElement, useEffect, useRef, useState} from "react";
-import {DeviceContext, MessageContext, RoomContext, RTCContext, UserContext, UserInfoSettingsContext} from "./contexts";
+import { AppContext, DeviceContext, MessageContext, RoomContext, RTCContext, UserContext, UserInfoSettingsContext} from "./contexts";
 import {RTCConnectionManager, RTCEventType} from "../rtc/connection-manager";
 import AudioManager from "./audio-manager";
 import {Message} from "./home/message-view/message-card";
@@ -16,16 +16,22 @@ function getDefaultDevice(devices: MediaDeviceInfo[], kind: MediaDeviceKind) {
   return candidate ?? kindDevices.length > 0 ? kindDevices[0].deviceId : null;
 }
 
-export default function State({children}: { children: ReactElement }) {
+export default function State({ children }: { children: ReactElement }) {
   // ---------------------- DeviceContext ----------------------
-  const [audioInputDeviceId, setAudioInputDeviceId] = useState<string | null>(null);
-  const [audioOutputDeviceId, setAudioOutputDeviceId] = useState<string | null>(null);
+  const [audioInputDeviceId, setAudioInputDeviceId] = useState<string | null>(
+    null,
+  );
+  const [audioOutputDeviceId, setAudioOutputDeviceId] = useState<string | null>(
+    null,
+  );
   const [isInputMuted, setIsInputMuted] = useState<boolean>(false);
   const [isOutputMuted, setIsOutputMuted] = useState<boolean>(false);
 
   // ---------------------- RTCContext ----------------------
-  const [rtcConnectionManager, setRtcConnectionManager] = useState<RTCConnectionManager | null>(null);
-  const [rtcMessageHandler, setRtcMessageHandler] = useState<RTCMessageHandler | null>(null);
+  const [rtcConnectionManager, setRtcConnectionManager] =
+    useState<RTCConnectionManager | null>(null);
+  const [rtcMessageHandler, setRtcMessageHandler] =
+    useState<RTCMessageHandler | null>(null);
 
   // ---------------------- MessageContext ----------------------
   const [messageList, setMessageList] = useState<Message[]>([]);
@@ -36,7 +42,9 @@ export default function State({children}: { children: ReactElement }) {
   const [roomCode, setRoomCode] = useState<string>('');
   const [roomId, setRoomId] = useState<string | null>(null);
   const [peerNames, setPeerNames] = useState(new Map<string, string>());
-  const [persistedRooms, setPersistedRooms] = useState(new Map<string, RoomPersistenceData>());
+  const [persistedRooms, setPersistedRooms] = useState(
+    new Map<string, RoomPersistenceData>(),
+  );
 
   // ---------------------- UserContext ----------------------
   const [userName, setUserName] = useState<string>('');
@@ -46,10 +54,16 @@ export default function State({children}: { children: ReactElement }) {
   const [userNameInput, setUserNameInput] = useState<string>('');
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  const informationRef = useRef({name: userName, clientId: clientId ?? ''} as PeerInformation);
+  // ---------------------- AppContext ----------------------
+  const [version, setVersion] = useState<string>('');
+
+  const informationRef = useRef({
+    name: userName,
+    clientId: clientId ?? '',
+  } as PeerInformation);
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('load-data', input => {
+    window.electron.ipcRenderer.on('load-data', (input) => {
       const data = validateData(input);
 
       if (data == null) return;
@@ -57,61 +71,78 @@ export default function State({children}: { children: ReactElement }) {
       setUserName(data.user.name);
       setAudioInputDeviceId(data.devices.inputDeviceId);
       setAudioOutputDeviceId(data.devices.outputDeviceId);
-      setPersistedRooms(new Map(data.rooms.map(r => [r.id, r])));
+      setPersistedRooms(new Map(data.rooms.map((r) => [r.id, r])));
       setDarkMode(data.darkMode ?? false);
     });
 
     window.electron.ipcRenderer.sendMessage('load-data');
 
-    navigator.mediaDevices.enumerateDevices().then(allDevices => {
-      setAudioInputDeviceId(prev => prev != null ? prev : getDefaultDevice(allDevices, 'audioinput'));
-      setAudioOutputDeviceId(prev => prev != null ? prev : getDefaultDevice(allDevices, 'audiooutput'));
+    window.electron.ipcRenderer.on('version', version => {
+      setVersion(version as string);
+    })
+
+    navigator.mediaDevices.enumerateDevices().then((allDevices) => {
+      setAudioInputDeviceId((prev) =>
+        prev != null ? prev : getDefaultDevice(allDevices, 'audioinput'),
+      );
+      setAudioOutputDeviceId((prev) =>
+        prev != null ? prev : getDefaultDevice(allDevices, 'audiooutput'),
+      );
 
       const connectionManager = new RTCConnectionManager(window.signalingUrl);
       const messageHandler = new RTCMessageHandler();
 
       messageHandler.addChatEventListener((sender, message) => {
-        setMessageList(prev => [...prev, {
-          fromMe: false,
-          sender,
-          message
-        }])
+        setMessageList((prev) => [
+          ...prev,
+          {
+            fromMe: false,
+            sender,
+            message: message.message,
+            type: message.type
+          },
+        ]);
       });
 
-      messageHandler.addInformationEventListener(information => {
-        setPeerNames(prev => {
+      messageHandler.addInformationEventListener((information) => {
+        setPeerNames((prev) => {
           const tmp = new Map(prev.entries());
 
           tmp.set(information.clientId, information.name);
 
           return tmp;
-        })
+        });
       });
 
-      connectionManager.addEventListener(RTCEventType.ClientId, event => {
+      connectionManager.addEventListener(RTCEventType.ClientId, (event) => {
         setClientId(event.clientId!);
-        setUserName(prev => prev.trim().length === 0 ? event.clientId! : prev);
-      })
+        setUserName((prev) =>
+          prev.trim().length === 0 ? event.clientId! : prev,
+        );
+      });
 
-      connectionManager.addEventListener(RTCEventType.ChatChannel, event => {
+      connectionManager.addEventListener(RTCEventType.ChatChannel, (event) => {
         messageHandler.addChatChannel(event.peer!, event.dataChannel!);
       });
 
-      connectionManager.addEventListener(RTCEventType.InformationChannel, event => {
-        messageHandler.addInformationChannel(event.peer!, event.dataChannel!);
-        messageHandler.sendInformation(informationRef.current, event.peer!);
-      });
+      connectionManager.addEventListener(
+        RTCEventType.InformationChannel,
+        (event) => {
+          messageHandler.addInformationChannel(event.peer!, event.dataChannel!);
+          messageHandler.sendInformation(informationRef.current, event.peer!);
+        },
+      );
 
-      connectionManager.addEventListener(RTCEventType.Disconnected, event => {
+      connectionManager.addEventListener(RTCEventType.Disconnected, (event) => {
         messageHandler.removeChannels(event.peer!);
-        setPeerNames(prev => {
+        setPeerNames((prev) => {
           const tmp = new Map(prev.entries());
 
           tmp.delete(event.peer!);
 
           return tmp;
-        })
-      })
+        });
+      });
 
       setRtcConnectionManager(connectionManager);
       setRtcMessageHandler(messageHandler);
@@ -123,7 +154,7 @@ export default function State({children}: { children: ReactElement }) {
 
     setUserNameInput(userName);
 
-    informationRef.current = {name: userName, clientId: clientId ?? ''};
+    informationRef.current = { name: userName, clientId: clientId ?? '' };
 
     rtcMessageHandler.sendInformation(informationRef.current);
   }, [userName, clientId]);
@@ -140,62 +171,80 @@ export default function State({children}: { children: ReactElement }) {
         outputDeviceId: audioOutputDeviceId,
       },
       rooms: Array.from(persistedRooms.values()),
-      darkMode
+      darkMode,
     };
 
     window.electron.ipcRenderer.sendMessage('save-data', data);
-  }, [userName, audioInputDeviceId, audioOutputDeviceId, persistedRooms, darkMode]);
+  }, [
+    userName,
+    audioInputDeviceId,
+    audioOutputDeviceId,
+    persistedRooms,
+    darkMode,
+  ]);
 
   return (
-    <DeviceContext value={{
-      audioInputDeviceId: audioInputDeviceId,
-      setAudioInputDeviceId: setAudioInputDeviceId,
-      isInputMuted,
-      setIsInputMuted,
-      audioOutputDeviceId: audioOutputDeviceId,
-      setAudioOutputDeviceId: setAudioOutputDeviceId,
-      isOutputMuted,
-      setIsOutputMuted,
-    }}>
-      <RTCContext value={{
-        rtcConnectionManager,
-        setRtcConnectionManager,
-        rtcMessageHandler,
-        setRtcMessageHandler
-      }}>
-        <MessageContext value={{
-          messageList,
-          setMessageList,
-          messageInput,
-          setMessageInput
-        }}>
-          <RoomContext value={{
-            roomCodeInput,
-            setRoomCodeInput,
-            roomId,
-            setRoomId,
-            roomCode,
-            setRoomCode,
-            peerNames,
-            setPeerNames,
-            persistedRooms,
-            setPersistedRooms
-          }}>
-            <UserContext value={{
-              userName,
-              setUserName,
-              clientId,
-              setClientId
-            }}>
-              <UserInfoSettingsContext value={{
-                userNameInput,
-                setUserNameInput,
-                darkMode,
-                setDarkMode
-              }}>
-                <AudioManager>
-                  {children}
-                </AudioManager>
+    <DeviceContext
+      value={{
+        audioInputDeviceId: audioInputDeviceId,
+        setAudioInputDeviceId: setAudioInputDeviceId,
+        isInputMuted,
+        setIsInputMuted,
+        audioOutputDeviceId: audioOutputDeviceId,
+        setAudioOutputDeviceId: setAudioOutputDeviceId,
+        isOutputMuted,
+        setIsOutputMuted,
+      }}
+    >
+      <RTCContext
+        value={{
+          rtcConnectionManager,
+          setRtcConnectionManager,
+          rtcMessageHandler,
+          setRtcMessageHandler,
+        }}
+      >
+        <MessageContext
+          value={{
+            messageList,
+            setMessageList,
+            messageInput,
+            setMessageInput,
+          }}
+        >
+          <RoomContext
+            value={{
+              roomCodeInput,
+              setRoomCodeInput,
+              roomId,
+              setRoomId,
+              roomCode,
+              setRoomCode,
+              peerNames,
+              setPeerNames,
+              persistedRooms,
+              setPersistedRooms,
+            }}
+          >
+            <UserContext
+              value={{
+                userName,
+                setUserName,
+                clientId,
+                setClientId,
+              }}
+            >
+              <UserInfoSettingsContext
+                value={{
+                  userNameInput,
+                  setUserNameInput,
+                  darkMode,
+                  setDarkMode,
+                }}
+              >
+                <AppContext value={{version, setVersion}}>
+                  <AudioManager>{children}</AudioManager>
+                </AppContext>
               </UserInfoSettingsContext>
             </UserContext>
           </RoomContext>

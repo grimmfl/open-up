@@ -5,16 +5,26 @@ export interface PeerInformation {
   name: string;
 }
 
+
+export const RTCMessageType = ['text', 'image'] as const;
+export type RTCMessageType = (typeof RTCMessageType)[number];
+
+
+export interface RTCMessage {
+  message: string;
+  type: RTCMessageType;
+}
+
 export class RTCMessageHandler {
   private chatChannels = new Map<string, RTCDataChannel>();
   private informationChannels = new Map<string, RTCDataChannel>();
 
-  private chatEventListeners: ((peer: string, message: string) => void)[] = [];
+  private chatEventListeners: ((peer: string, message: RTCMessage) => void)[] = [];
   private informationEventListeners: ((information: PeerInformation) => void)[] = [];
 
-  send(message: string) {
+  send(message: RTCMessage) {
     for (const channel of this.chatChannels.values()) {
-      channel.send(message);
+      channel.send(JSON.stringify(message));
     }
   }
 
@@ -35,7 +45,7 @@ export class RTCMessageHandler {
 
     this.chatEventListeners.forEach(callback => {
       channel.addEventListener('message', event => {
-        callback(clientId, event.data);
+        callback(clientId, JSON.parse(event.data));
         console.log(`Received ${event.data}`);
       });
     });
@@ -54,11 +64,11 @@ export class RTCMessageHandler {
     this.informationChannels.delete(clientId);
   }
 
-  addChatEventListener(callback: (peer: string, message: string) => void) {
+  addChatEventListener(callback: (peer: string, message: RTCMessage) => void) {
     this.chatEventListeners.push(callback);
 
     this.chatChannels.forEach((channel, peer) => {
-      channel.addEventListener('message', event => callback(peer, event.data))
+      channel.addEventListener('message', event => callback(peer, JSON.parse(event.data)))
     });
   }
 

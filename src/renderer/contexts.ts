@@ -104,3 +104,12 @@ export const UserInfoSettingsContext = createContext<{
   darkMode: false,
   setDarkMode: () => {},
 });
+
+// ---------------------- AppContext ----------------------
+export const AppContext = createContext<{
+  version: string,
+  setVersion: Dispatch<SetStateAction<string>>,
+}>({
+  version: '',
+  setVersion: () => {},
+});

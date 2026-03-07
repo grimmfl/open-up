@@ -26,7 +26,7 @@ async function isImageURL(url: string) {
     return true;
   }
   try {
-    const res = await fetch(url, { method: 'HEAD' });
+    const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
     return res.headers.get('Content-Type')?.startsWith('image/') ?? false;
   } catch {
     return false;

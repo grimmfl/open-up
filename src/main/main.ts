@@ -56,7 +56,7 @@ ipcMain.on('install', async () => {
 
 ipcMain.on('open-link', async (_, data) => {
   await shell.openExternal(data);
-})
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

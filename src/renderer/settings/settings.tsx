@@ -6,6 +6,8 @@ import UserInfoSettings from "./user-info/user-info-settings";
 export default function Settings() {
   const {audioInputDeviceId, setAudioInputDeviceId, audioOutputDeviceId, setAudioOutputDeviceId} = useContext(DeviceContext);
 
+
+
   return (
     <div>
       <div>

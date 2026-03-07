@@ -44,6 +44,7 @@ export default function State({children}: { children: ReactElement }) {
 
   // ---------------------- UserInfoSettingsContext ----------------------
   const [userNameInput, setUserNameInput] = useState<string>('');
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   const informationRef = useRef({name: userName, clientId: clientId ?? ''} as PeerInformation);
 
@@ -57,6 +58,7 @@ export default function State({children}: { children: ReactElement }) {
       setAudioInputDeviceId(data.devices.inputDeviceId);
       setAudioOutputDeviceId(data.devices.outputDeviceId);
       setPersistedRooms(new Map(data.rooms.map(r => [r.id, r])));
+      setDarkMode(data.darkMode ?? false);
     });
 
     window.electron.ipcRenderer.sendMessage('load-data');
@@ -137,11 +139,12 @@ export default function State({children}: { children: ReactElement }) {
         inputDeviceId: audioInputDeviceId,
         outputDeviceId: audioOutputDeviceId,
       },
-      rooms: Array.from(persistedRooms.values())
-    }
+      rooms: Array.from(persistedRooms.values()),
+      darkMode
+    };
 
     window.electron.ipcRenderer.sendMessage('save-data', data);
-  }, [userName, audioInputDeviceId, audioOutputDeviceId, persistedRooms]);
+  }, [userName, audioInputDeviceId, audioOutputDeviceId, persistedRooms, darkMode]);
 
   return (
     <DeviceContext value={{
@@ -186,7 +189,9 @@ export default function State({children}: { children: ReactElement }) {
             }}>
               <UserInfoSettingsContext value={{
                 userNameInput,
-                setUserNameInput
+                setUserNameInput,
+                darkMode,
+                setDarkMode
               }}>
                 <AudioManager>
                   {children}

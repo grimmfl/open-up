@@ -4,14 +4,10 @@ import {UserContext, UserInfoSettingsContext} from "../../contexts";
 export default function UserInfoSettings() {
   const { setUserName } = useContext(UserContext);
 
-  const { userNameInput, setUserNameInput } = useContext(UserInfoSettingsContext);
+  const { userNameInput, setUserNameInput, darkMode, setDarkMode } = useContext(UserInfoSettingsContext);
 
   function getIsSaveDisabled() {
-    if (userNameInput.trim().length === 0) {
-      return true;
-    }
-
-    return false;
+    return userNameInput.trim().length === 0;
   }
 
   function save() {
@@ -26,6 +22,11 @@ export default function UserInfoSettings() {
       </div>
 
       <button className="btn mt-2 w-100" disabled={getIsSaveDisabled()} onClick={save}>Save</button>
+
+      <div className="form-check form-switch mt-2">
+        <input className="form-check-input switch" type="checkbox" role="switch" id="darkModeSwitch" checked={darkMode} onChange={(e) => setDarkMode(e.target.checked)}/>
+        <label className="form-check-label" htmlFor="darkModeSwitch">Dark Mode</label>
+      </div>
     </div>
   )
 }

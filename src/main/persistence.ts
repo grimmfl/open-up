@@ -5,10 +5,12 @@ import {PersistenceData, validateData} from "../shared/data";
 
 const fileName = 'settings.json';
 
-export function save(input: any) {
+export function save(input: any, afterValidate: (data: PersistenceData) => void) {
   const data = validateData(input);
 
   if (data == null) return;
+
+  afterValidate(data);
 
   const dirPath = getDataPath();
 

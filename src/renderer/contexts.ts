@@ -96,7 +96,11 @@ export const UserContext = createContext<{
 export const UserInfoSettingsContext = createContext<{
   userNameInput: string,
   setUserNameInput: Dispatch<SetStateAction<string>>,
+  darkMode: boolean,
+  setDarkMode: Dispatch<SetStateAction<boolean>>,
 }>({
   userNameInput: '',
-  setUserNameInput: () => {}
+  setUserNameInput: () => {},
+  darkMode: false,
+  setDarkMode: () => {},
 });

@@ -12,6 +12,7 @@ export interface PersistenceData {
     outputDeviceId: string;
   };
   rooms: RoomPersistenceData[];
+  darkMode?: boolean;
 }
 
 export const ValidationError = null;
@@ -25,12 +26,17 @@ export function validateData(data: any): PersistenceData | ValidationError {
   const devices = validateDevices(data.devices, ['devices']);
   const rooms = validateRooms(data.rooms, ['rooms']);
 
+  if (data.darkMode != null && typeof data.darkMode !== 'boolean') {
+    return validationError(data.darkMode, ['darkMode']);
+  }
+
   if (user == ValidationError || devices == ValidationError || rooms == ValidationError) return ValidationError;
 
   return {
     user,
     devices,
-    rooms
+    rooms,
+    darkMode: data.darkMode,
   };
 }
 

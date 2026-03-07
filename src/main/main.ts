@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import {app, BrowserWindow, shell, ipcMain} from 'electron';
+import {app, BrowserWindow, shell, ipcMain, nativeTheme} from 'electron';
 import {autoUpdater} from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -27,11 +27,23 @@ let mainWindow: BrowserWindow | null = null;
 ipcMain.on('load-data', async (event) => {
   const data = load();
 
+  if (data?.darkMode != null) {
+    nativeTheme.themeSource = data.darkMode ? 'dark' : 'light';
+  }
+
+  if (data != null && data?.darkMode == null) {
+    data.darkMode = nativeTheme.shouldUseDarkColors;
+  }
+
   event.reply('load-data', data);
 });
 
 ipcMain.on('save-data', async (_, data) => {
-  save(data);
+  save(data, data => {
+    if (data.darkMode != null) {
+      nativeTheme.themeSource = data.darkMode ? 'dark' : 'light';
+    }
+  });
 });
 
 ipcMain.on('install-on-quit', async () => {

@@ -52,7 +52,7 @@ ipcMain.on('install-on-quit', async () => {
 
 ipcMain.on('install', async () => {
   autoUpdater.quitAndInstall(true, true);
-})
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -102,6 +102,7 @@ const createWindow = async () => {
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
+    autoHideMenuBar: true
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

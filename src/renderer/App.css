@@ -245,3 +245,16 @@ progress::-webkit-progress-value {
 .switch:checked {
   --bs-form-switch-bg: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%22-4%20-4%208%208%22%3E%3Ccircle%20r%3D%223%22%20fill%3D%22%2303cafc%22%2F%3E%3C%2Fsvg%3E') !important;
 }
+
+.tooltip-dialog {
+  position: absolute;
+  width: 50vh;
+  background-color: var(--color-background);
+  z-index: 101;
+  border: 1px solid var(--color-borders) !important;
+  border-radius: 5px;
+}
+
+.ignore-blur {
+  z-index: 101 !important;
+}

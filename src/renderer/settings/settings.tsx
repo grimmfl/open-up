@@ -11,7 +11,7 @@ export default function Settings() {
   return (
     <div>
       <div>
-        <h5>User</h5>
+        <h5>General</h5>
         <UserInfoSettings></UserInfoSettings>
       </div>
 

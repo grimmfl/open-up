@@ -14,7 +14,11 @@ export function UpdateDisplay() {
     setIsAutoUpdate(true);
   })
 
+  function onUpdate(): void {
+    setIsManualUpdate(false);
+  }
+
   return ((isManualUpdate || isAutoUpdate) &&
-    (isManualUpdate ? <UpdateDisplayManual/> : <UpdateDisplayAuto/>)
+    (isManualUpdate ? <UpdateDisplayManual/> : <UpdateDisplayAuto onUpdate={onUpdate}/>)
   );
 }

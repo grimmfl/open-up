@@ -267,3 +267,16 @@ progress::-webkit-progress-value {
   word-break: break-word;
   overflow-wrap: break-word;
 }
+
+.new-message-tooltip {
+  position: absolute;
+  bottom: 15px;
+  padding: 4px;
+  box-shadow: 0 0 3px var(--color-background-darker);
+  left: 25%;
+  width: 50%;
+  background-color: var(--color-background);
+  z-index: 101;
+  border: 1px solid var(--color-borders) !important;
+  border-radius: 5px;
+}

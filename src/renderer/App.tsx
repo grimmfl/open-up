@@ -10,12 +10,8 @@ import ErrorDisplay from "./ErrorDisplay";
 import {UpdateDisplay} from "./update-display/update-display";
 
 
-
-function Hello() {
+function AppContent() {
   const [sidebarValue, setSidebarValue] = useState<SidebarValue>('home');
-
-  console.log('signaling', window.signalingUrl);
-
 
   function getWindow() {
     switch (sidebarValue) {
@@ -27,15 +23,24 @@ function Hello() {
   }
 
   return (
+    <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
+        <Sidebar onChange={setSidebarValue} initial={'home'}/>
+        <div className="flex-grow-1 p-4 p-md-5 vh-100 bg scrollable">
+          { getWindow() }
+        </div>
+    </div>
+  )
+}
+
+
+function StateWrapper() {
+  return (
     <State>
       <div className="d-flex flex-column bg">
         <UpdateDisplay/>
         <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
           <ErrorDisplay></ErrorDisplay>
-          <Sidebar onChange={setSidebarValue} initial={'home'}/>
-          <div className="flex-grow-1 p-4 p-md-5 vh-100 bg scrollable">
-            { getWindow() }
-          </div>
+          <AppContent/>
         </div>
       </div>
     </State>
@@ -46,7 +51,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello/>}/>
+        <Route path="/" element={<StateWrapper/>}/>
       </Routes>
     </Router>
   );

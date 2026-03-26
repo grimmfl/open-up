@@ -280,3 +280,39 @@ progress::-webkit-progress-value {
   border: 1px solid var(--color-borders) !important;
   border-radius: 5px;
 }
+
+.peer-menu {
+  position: absolute;
+  box-shadow: 0 0 3px var(--color-background-darker);
+  background-color: var(--color-background);
+  z-index: 101;
+  border: 1px solid var(--color-borders) !important;
+  border-radius: 5px;
+}
+
+/* Force thumb color - Chromium/Electron only needs webkit */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-color: var(--color-primary) !important;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  margin-top: calc((0.5rem - 1rem) / 2); /* (track-height - thumb-height) / 2 */
+}
+
+/* Force track color */
+input[type="range"]::-webkit-slider-runnable-track {
+  background-color: var(--color-background-darker) !important;
+  height: 0.5rem;
+  border-radius: 1rem;
+}
+
+/* Remove Bootstrap's default appearance override */
+input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+}

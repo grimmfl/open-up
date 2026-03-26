@@ -16,6 +16,7 @@ export function UpdateDisplay() {
 
   function onUpdate(): void {
     setIsManualUpdate(false);
+    setIsAutoUpdate(false);
   }
 
   return ((isManualUpdate || isAutoUpdate) &&

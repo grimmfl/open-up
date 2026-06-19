@@ -150,7 +150,7 @@ function validatePeer(data: any, path: string[]): PeerPersistenceData | Validati
     return validationError(data.clientId, [...path, 'clientId']);
   }
 
-  if (data.volume == null || typeof data.volume !== 'string') {
+  if (data.volume == null || typeof data.volume !== 'number') {
     return validationError(data.volume, [...path, 'volume']);
   }
 

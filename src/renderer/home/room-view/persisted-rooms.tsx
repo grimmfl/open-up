@@ -10,7 +10,6 @@ export default function PersistedRooms() {
 
   function joinRoom(roomId: string) {
     rtcConnectionManager?.addEventListener(RTCEventType.Message, ({message}, callbackId) => {
-      console.log("joinRoom", message, roomId);
       const peerListMessage = (message as SignalingPeerList);
       if (peerListMessage.roomId === roomId) {
         setRoomCode(peerListMessage.roomCode);

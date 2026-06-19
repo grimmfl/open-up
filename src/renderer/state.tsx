@@ -105,6 +105,7 @@ export default function State({ children }: { children: ReactElement }) {
         });
 
         messageHandler.addInformationEventListener((information) => {
+          console.log('info', information);
           setPeerNames((prev) => {
             const tmp = new Map(prev.entries());
 
@@ -164,7 +165,7 @@ export default function State({ children }: { children: ReactElement }) {
     informationRef.current = { name: userName, clientId: clientId ?? '' };
 
     rtcMessageHandler.sendInformation(informationRef.current);
-  }, [userName, clientId]);
+  }, [userName, clientId, rtcMessageHandler]);
 
   useEffect(() => {
     if (audioInputDeviceId == null || audioOutputDeviceId == null) return;

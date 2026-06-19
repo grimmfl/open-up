@@ -1,6 +1,7 @@
 import {ReactElement, useContext, useEffect, useState} from "react";
 import {DeviceContext, PeerSettingsContext, RTCContext} from "./contexts";
 import {RTCEventType} from "../rtc/connection-manager";
+import {alterMapState} from "../shared/utils";
 
 export default function AudioManager({children}: { children: ReactElement }) {
   const { audioInputDeviceId, audioOutputDeviceId, isOutputMuted, isInputMuted } = useContext(DeviceContext);
@@ -44,7 +45,23 @@ export default function AudioManager({children}: { children: ReactElement }) {
         return audios;
       })
     });
-  }, [audioOutputDeviceId, rtcConnectionManager, peers]);
+  }, [audioOutputDeviceId, rtcConnectionManager]);
+
+  useEffect(() => {
+    setOutputAudios(audios => {
+      for (const peer of peers.values()) {
+        const audio = audios.get(peer.clientId);
+
+        console.log(peer);
+        console.log(audios);
+        if (!audio) continue;
+
+        audio.volume = Math.min(peer.volume, 100) / 100;
+      }
+
+      return audios;
+    })
+  }, [peers]);
 
   useEffect(() => {
     setOutputAudios(audios => {

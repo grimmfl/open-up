@@ -40,11 +40,11 @@ export default function PeersDisplay() {
   return (
     <table className="table">
       <tbody>
-      {Array.from(peerNames.values()).map((peer, index) =>
+      {Array.from(peerNames.entries()).map(([peerId, peerName], index) =>
         <tr key={`peer${index}`}>
-          <td onClick={() => openPeerMenu(peer)}>
-            {peer}
-            {peer == peerMenu &&
+          <td onClick={() => openPeerMenu(peerId)}>
+            {peerName}
+            {peerId == peerMenu &&
               <div className="peer-menu d-flex flex-column" ref={peerMenuRef}>
                 <div className="p-2">
                   <input type="range" min={0} max={100} className="custom-range mx-2" value={peerVolume} onChange={e => setVolume(e.target.valueAsNumber)}></input>

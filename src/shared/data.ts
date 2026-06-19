@@ -3,9 +3,15 @@ export interface RoomPersistenceData {
   name: string;
 }
 
+export interface PeerPersistenceData {
+  clientId: string;
+  volume: number;
+}
+
 export interface PersistenceData {
   user: {
     name: string;
+    clientId?: string;
   };
   devices: {
     inputDeviceId: string;
@@ -13,6 +19,7 @@ export interface PersistenceData {
   };
   rooms: RoomPersistenceData[];
   darkMode?: boolean;
+  peers?: PeerPersistenceData[];
 }
 
 export const ValidationError = null;
@@ -25,18 +32,20 @@ export function validateData(data: any): PersistenceData | ValidationError {
   const user = validateUser(data.user, ['user']);
   const devices = validateDevices(data.devices, ['devices']);
   const rooms = validateRooms(data.rooms, ['rooms']);
+  const peers = validatePeers(data.peers, ['peers']);
 
   if (data.darkMode != null && typeof data.darkMode !== 'boolean') {
     return validationError(data.darkMode, ['darkMode']);
   }
 
-  if (user == ValidationError || devices == ValidationError || rooms == ValidationError) return ValidationError;
+  if (user === ValidationError || devices === ValidationError || rooms === ValidationError || peers === ValidationError) return ValidationError;
 
   return {
     user,
     devices,
     rooms,
     darkMode: data.darkMode,
+    peers
   };
 }
 
@@ -49,7 +58,11 @@ function validateUser(data: any, path: string[]): PersistenceData['user'] | Vali
     return validationError(data.name, [...path, 'name']);
   }
 
-  return { name: data.name };
+  if (data.clientId != null && typeof data.clientId !== 'string') {
+    return validationError(data.clientId, [...path, 'clientId']);
+  }
+
+  return { name: data.name, clientId: data.clientId };
 }
 
 function validateDevices(data: any, path: string[]): PersistenceData['devices'] | ValidationError {
@@ -105,6 +118,45 @@ function validateRoom(data: any, path: string[]): RoomPersistenceData | Validati
   return {
     id: data.id,
     name: data.name
+  };
+}
+
+function validatePeers(data: any, path: string[]): PeerPersistenceData[] | undefined | ValidationError {
+  if (data == null) return undefined;
+
+  if (!Array.isArray(data)) {
+    return validationError(data, path);
+  }
+
+  const peers = [];
+
+  for (let [peer, i] of data.map((p, i) => [p, i])) {
+    const result = validatePeer(peer, [...path, i.toString()]);
+
+    if (result === ValidationError) return result;
+
+    peers.push(result);
+  }
+
+  return peers;
+}
+
+function validatePeer(data: any, path: string[]): PeerPersistenceData | ValidationError {
+  if (data == null) {
+    return validationError(data, path);
+  }
+
+  if (data.clientId == null || typeof data.clientId !== 'string') {
+    return validationError(data.clientId, [...path, 'clientId']);
+  }
+
+  if (data.volume == null || typeof data.volume !== 'string') {
+    return validationError(data.volume, [...path, 'volume']);
+  }
+
+  return {
+    clientId: data.clientId,
+    volume: data.volume
   };
 }
 

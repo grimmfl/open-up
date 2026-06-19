@@ -1,10 +1,13 @@
 import {ReactElement, useEffect, useRef, useState} from "react";
-import { AppContext, DeviceContext, MessageContext, RoomContext, RTCContext, UserContext, UserInfoSettingsContext} from "./contexts";
+import {
+  AppContext, DeviceContext, MessageContext,
+  PeerSettingsContext, RoomContext, RTCContext, UserContext, UserInfoSettingsContext
+} from "./contexts";
 import {RTCConnectionManager, RTCEventType} from "../rtc/connection-manager";
 import AudioManager from "./audio-manager";
 import {Message} from "./home/message-view/message-card";
 import {PeerInformation, RTCMessageHandler} from "../rtc/message-handler";
-import {PersistenceData, RoomPersistenceData, validateData} from "../shared/data";
+import {PeerPersistenceData, PersistenceData, RoomPersistenceData, validateData} from "../shared/data";
 
 
 function getDefaultDevice(devices: MediaDeviceInfo[], kind: MediaDeviceKind) {
@@ -57,6 +60,9 @@ export default function State({ children }: { children: ReactElement }) {
   // ---------------------- AppContext ----------------------
   const [version, setVersion] = useState<string>('');
 
+  // ---------------------- PeerSettingsContext ----------------------
+  const [peers, setPeers] = useState<Map<string, PeerPersistenceData>>(new Map<string, PeerPersistenceData>());
+
   const informationRef = useRef({
     name: userName,
     clientId: clientId ?? '',
@@ -69,83 +75,84 @@ export default function State({ children }: { children: ReactElement }) {
       if (data == null) return;
 
       setUserName(data.user.name);
+      setClientId(data.user.clientId ?? null);
       setAudioInputDeviceId(data.devices.inputDeviceId);
       setAudioOutputDeviceId(data.devices.outputDeviceId);
       setPersistedRooms(new Map(data.rooms.map((r) => [r.id, r])));
       setDarkMode(data.darkMode ?? false);
+
+      navigator.mediaDevices.enumerateDevices().then((allDevices) => {
+        setAudioInputDeviceId((prev) =>
+          prev != null ? prev : getDefaultDevice(allDevices, 'audioinput'),
+        );
+        setAudioOutputDeviceId((prev) =>
+          prev != null ? prev : getDefaultDevice(allDevices, 'audiooutput'),
+        );
+
+        const connectionManager = new RTCConnectionManager(window.signalingUrl, data.user.clientId ?? null);
+        const messageHandler = new RTCMessageHandler();
+
+        messageHandler.addChatEventListener((sender, message) => {
+          setMessageList((prev) => [
+            ...prev,
+            {
+              fromMe: false,
+              sender,
+              message: message.message,
+              type: message.type
+            },
+          ]);
+        });
+
+        messageHandler.addInformationEventListener((information) => {
+          setPeerNames((prev) => {
+            const tmp = new Map(prev.entries());
+
+            tmp.set(information.clientId, information.name);
+
+            return tmp;
+          });
+        });
+
+        connectionManager.addEventListener(RTCEventType.ClientId, (event) => {
+          setClientId(event.clientId!);
+          setUserName((prev) =>
+            prev.trim().length === 0 ? event.clientId! : prev,
+          );
+        });
+
+        connectionManager.addEventListener(RTCEventType.ChatChannel, (event) => {
+          messageHandler.addChatChannel(event.peer!, event.dataChannel!);
+        });
+
+        connectionManager.addEventListener(
+          RTCEventType.InformationChannel,
+          (event) => {
+            messageHandler.addInformationChannel(event.peer!, event.dataChannel!);
+            messageHandler.sendInformation(informationRef.current, event.peer!);
+          },
+        );
+
+        connectionManager.addEventListener(RTCEventType.Disconnected, (event) => {
+          messageHandler.removeChannels(event.peer!);
+          setPeerNames((prev) => {
+            const tmp = new Map(prev.entries());
+
+            tmp.delete(event.peer!);
+
+            return tmp;
+          });
+        });
+
+        setRtcConnectionManager(connectionManager);
+        setRtcMessageHandler(messageHandler);
+      });
     });
 
     window.electron.ipcRenderer.sendMessage('load-data');
 
     window.electron.ipcRenderer.on('version', version => {
       setVersion(version as string);
-    })
-
-    navigator.mediaDevices.enumerateDevices().then((allDevices) => {
-      setAudioInputDeviceId((prev) =>
-        prev != null ? prev : getDefaultDevice(allDevices, 'audioinput'),
-      );
-      setAudioOutputDeviceId((prev) =>
-        prev != null ? prev : getDefaultDevice(allDevices, 'audiooutput'),
-      );
-
-      const connectionManager = new RTCConnectionManager(window.signalingUrl);
-      const messageHandler = new RTCMessageHandler();
-
-      messageHandler.addChatEventListener((sender, message) => {
-        setMessageList((prev) => [
-          ...prev,
-          {
-            fromMe: false,
-            sender,
-            message: message.message,
-            type: message.type
-          },
-        ]);
-      });
-
-      messageHandler.addInformationEventListener((information) => {
-        setPeerNames((prev) => {
-          const tmp = new Map(prev.entries());
-
-          tmp.set(information.clientId, information.name);
-
-          return tmp;
-        });
-      });
-
-      connectionManager.addEventListener(RTCEventType.ClientId, (event) => {
-        setClientId(event.clientId!);
-        setUserName((prev) =>
-          prev.trim().length === 0 ? event.clientId! : prev,
-        );
-      });
-
-      connectionManager.addEventListener(RTCEventType.ChatChannel, (event) => {
-        messageHandler.addChatChannel(event.peer!, event.dataChannel!);
-      });
-
-      connectionManager.addEventListener(
-        RTCEventType.InformationChannel,
-        (event) => {
-          messageHandler.addInformationChannel(event.peer!, event.dataChannel!);
-          messageHandler.sendInformation(informationRef.current, event.peer!);
-        },
-      );
-
-      connectionManager.addEventListener(RTCEventType.Disconnected, (event) => {
-        messageHandler.removeChannels(event.peer!);
-        setPeerNames((prev) => {
-          const tmp = new Map(prev.entries());
-
-          tmp.delete(event.peer!);
-
-          return tmp;
-        });
-      });
-
-      setRtcConnectionManager(connectionManager);
-      setRtcMessageHandler(messageHandler);
     });
   }, []);
 
@@ -165,6 +172,7 @@ export default function State({ children }: { children: ReactElement }) {
     const data: PersistenceData = {
       user: {
         name: userName,
+        clientId: clientId ?? undefined
       },
       devices: {
         inputDeviceId: audioInputDeviceId,
@@ -172,16 +180,30 @@ export default function State({ children }: { children: ReactElement }) {
       },
       rooms: Array.from(persistedRooms.values()),
       darkMode,
+      peers: Array.from(peers.values()),
     };
 
     window.electron.ipcRenderer.sendMessage('save-data', data);
   }, [
+    clientId,
     userName,
     audioInputDeviceId,
     audioOutputDeviceId,
     persistedRooms,
     darkMode,
+    peers
   ]);
+
+  useEffect(() => {
+    for (const [id, _] of peerNames.entries()) {
+      if (peers.has(id)) continue;
+
+      peers.set(id, {
+        clientId: id,
+        volume: 100
+      });
+    }
+  }, [peerNames]);
 
   return (
     <DeviceContext
@@ -243,7 +265,9 @@ export default function State({ children }: { children: ReactElement }) {
                 }}
               >
                 <AppContext value={{version, setVersion}}>
-                  <AudioManager>{children}</AudioManager>
+                  <PeerSettingsContext value={{peers, setPeers}}>
+                    <AudioManager>{children}</AudioManager>
+                  </PeerSettingsContext>
                 </AppContext>
               </UserInfoSettingsContext>
             </UserContext>

@@ -62,6 +62,11 @@ button {
   background-color: var(--color-background-darker) !important;
 }
 
+.bg-primaryy {
+  background-color: var(--color-primary) !important;
+}
+
+
 .w-95 {
   width: 95% !important;
 }

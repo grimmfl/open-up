@@ -7,7 +7,7 @@ import Home from "./home/home";
 import Settings from "./settings/settings";
 import State from "./state";
 import ErrorDisplay from "./ErrorDisplay";
-import {UpdateDisplay} from "./update-display/update-display";
+import UpdateDisplay from "./update-display/update-display";
 
 
 function AppContent() {
@@ -37,11 +37,12 @@ function StateWrapper() {
   return (
     <State>
       <div className="d-flex flex-column bg">
-        <UpdateDisplay/>
-        <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
-          <ErrorDisplay></ErrorDisplay>
-          <AppContent/>
-        </div>
+        <UpdateDisplay>
+          <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
+            <ErrorDisplay></ErrorDisplay>
+            <AppContent/>
+          </div>
+        </UpdateDisplay>
       </div>
     </State>
   );

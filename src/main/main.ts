@@ -46,14 +46,6 @@ ipcMain.on('save-data', async (_, data) => {
   });
 });
 
-ipcMain.on('install-on-quit', async () => {
-  autoUpdater.autoInstallOnAppQuit = true;
-});
-
-ipcMain.on('install', async () => {
-  autoUpdater.quitAndInstall(true, true);
-});
-
 ipcMain.on('open-link', async (_, data) => {
   await shell.openExternal(data);
 });
@@ -145,11 +137,16 @@ const checkForAutoUpdates = async () => {
   autoUpdater.logger = log;
 
   autoUpdater.on('update-available', () => {
+    mainWindow?.webContents.send('auto-update');
     autoUpdater.downloadUpdate();
   });
 
+  autoUpdater.on('download-progress', (progress) => {
+    mainWindow?.webContents.send('update-progress', progress.percent);
+  })
+
   autoUpdater.on('update-downloaded', () => {
-    mainWindow?.webContents.send('auto-update');
+    autoUpdater.quitAndInstall(true, true);
   });
 
   autoUpdater.on('error', (err) => {

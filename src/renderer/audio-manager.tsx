@@ -52,8 +52,6 @@ export default function AudioManager({children}: { children: ReactElement }) {
       for (const peer of peers.values()) {
         const audio = audios.get(peer.clientId);
 
-        console.log(peer);
-        console.log(audios);
         if (!audio) continue;
 
         audio.volume = Math.min(peer.volume, 100) / 100;

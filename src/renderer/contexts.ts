@@ -2,7 +2,7 @@ import {createContext, Dispatch, SetStateAction} from "react";
 import {RTCConnectionManager} from "../rtc/connection-manager";
 import {Message} from "./home/message-view/message-card";
 import {RTCMessageHandler} from "../rtc/message-handler";
-import {RoomPersistenceData} from "../shared/data";
+import {PeerPersistenceData, RoomPersistenceData} from "../shared/data";
 
 
 // ---------------------- DeviceContext ----------------------
@@ -112,4 +112,13 @@ export const AppContext = createContext<{
 }>({
   version: '',
   setVersion: () => {},
+});
+
+// ---------------------- PeerSettingsContext ----------------------
+export const PeerSettingsContext = createContext<{
+  peers: Map<string, PeerPersistenceData>;
+  setPeers: Dispatch<SetStateAction<Map<string, PeerPersistenceData>>>;
+}>({
+  peers: new Map<string, PeerPersistenceData>(),
+  setPeers: () => {},
 });

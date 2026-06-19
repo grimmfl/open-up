@@ -1,10 +1,12 @@
 import {ReactElement, useContext, useEffect, useState} from "react";
-import {DeviceContext, RTCContext} from "./contexts";
+import {DeviceContext, PeerSettingsContext, RTCContext} from "./contexts";
 import {RTCEventType} from "../rtc/connection-manager";
+import {alterMapState} from "../shared/utils";
 
 export default function AudioManager({children}: { children: ReactElement }) {
   const { audioInputDeviceId, audioOutputDeviceId, isOutputMuted, isInputMuted } = useContext(DeviceContext);
   const { rtcConnectionManager } = useContext(RTCContext);
+  const { peers } = useContext(PeerSettingsContext);
 
   const [ outputAudios, setOutputAudios ] = useState(new Map<string, HTMLAudioElement>());
 
@@ -30,10 +32,13 @@ export default function AudioManager({children}: { children: ReactElement }) {
     // TODO close audio on connection close
     rtcConnectionManager.addEventListener(RTCEventType.RemoteStream, async ({ peer, remoteStream }) => {
       setOutputAudios(audios => {
+        const peerSettings = peer != null ? peers.get(peer) : undefined;
+
         const audio = audios.get(peer!) ?? new Audio();
         audio.autoplay = true;
         audio.srcObject = remoteStream!;
         audio.setSinkId(audioOutputDeviceId).then();
+        audio.volume = Math.min(peerSettings?.volume ?? 100, 100) / 100;
 
         audios.set(peer!, audio);
 
@@ -41,6 +46,20 @@ export default function AudioManager({children}: { children: ReactElement }) {
       })
     });
   }, [audioOutputDeviceId, rtcConnectionManager]);
+
+  useEffect(() => {
+    setOutputAudios(audios => {
+      for (const peer of peers.values()) {
+        const audio = audios.get(peer.clientId);
+
+        if (!audio) continue;
+
+        audio.volume = Math.min(peer.volume, 100) / 100;
+      }
+
+      return audios;
+    })
+  }, [peers]);
 
   useEffect(() => {
     setOutputAudios(audios => {

@@ -10,7 +10,7 @@ import {
   SignalingMessage,
   SignalingMessageType,
   SignalingOffer,
-  SignalingPeerList
+  SignalingPeerList, SignalingRequestClientId
 } from "./signaling/messages";
 
 
@@ -61,7 +61,7 @@ export class RTCConnectionManager {
 
   private client;
 
-  constructor(url: string) {
+  constructor(url: string, clientId: string | null) {
     this.client = new SignalingClient(url);
 
     this.client.onMessage(async event => {
@@ -70,6 +70,7 @@ export class RTCConnectionManager {
 
     this.client.onOpen(async () => {
       console.log('Signaling connection opened.');
+      this.client.send(new SignalingRequestClientId('', '', clientId))
     });
   }
 

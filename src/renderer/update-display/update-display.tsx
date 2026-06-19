@@ -1,8 +1,8 @@
 import {UpdateDisplayManual} from "./update-display-manual";
-import {useState} from "react";
+import {ReactElement, ReactNode, useState} from "react";
 import UpdateDisplayAuto from "./update-display-auto";
 
-export function UpdateDisplay() {
+export default function UpdateDisplay({ children }: { children: ReactElement }) {
   const [isManualUpdate, setIsManualUpdate] = useState(false);
   const [isAutoUpdate, setIsAutoUpdate] = useState(false);
 
@@ -19,7 +19,13 @@ export function UpdateDisplay() {
     setIsAutoUpdate(false);
   }
 
-  return ((isManualUpdate || isAutoUpdate) &&
-    (isManualUpdate ? <UpdateDisplayManual/> : <UpdateDisplayAuto onUpdate={onUpdate}/>)
-  );
+  return !(isManualUpdate || isAutoUpdate)
+    ? <div className="d-flex justify-content-center align-items-center vh-100">
+      {
+        isManualUpdate
+        ? <UpdateDisplayManual/>
+          : <UpdateDisplayAuto onUpdate={onUpdate} />
+      }
+    </div>
+    : <div>{children}</div>;
 }

@@ -37,7 +37,7 @@ export default function AudioManager({children}: { children: ReactElement }) {
         audio.autoplay = true;
         audio.srcObject = remoteStream!;
         audio.setSinkId(audioOutputDeviceId).then();
-        audio.volume = peerSettings?.volume ?? 100;
+        audio.volume = Math.min(peerSettings?.volume ?? 100, 100) / 100;
 
         audios.set(peer!, audio);
 

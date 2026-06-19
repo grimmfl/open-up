@@ -2,16 +2,6 @@ import {GITHUB_REPO} from "../../shared/static";
 import {useEffect, useState} from "react";
 
 export default function UpdateDisplayAuto({ onUpdate }: { onUpdate: () => void}) {
-  function restartNow() {
-    window.electron.ipcRenderer.sendMessage('install');
-    onUpdate();
-  }
-
-  function restartLater() {
-    window.electron.ipcRenderer.sendMessage('install-on-quit');
-    onUpdate();
-  }
-
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {

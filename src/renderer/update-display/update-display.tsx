@@ -18,7 +18,7 @@ export default function UpdateDisplay({ children }: { children: ReactElement }) 
     setIsManualUpdate(false);
   }
 
-  return (isManualUpdate || isAutoUpdate)
+  return !(isManualUpdate || isAutoUpdate)
     ? <div className="d-flex justify-content-center align-items-center vh-100">
       {
         isManualUpdate

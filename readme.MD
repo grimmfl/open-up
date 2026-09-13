@@ -20,3 +20,9 @@ xattr -d com.apple.quarantine /path/to/file
 
 ### Icons
 The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).
+
+### Build process
+- Set version in package.json and release/package.json
+- run ```npm install```
+- Push
+- Run Worfklow in GH

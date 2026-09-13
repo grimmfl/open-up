@@ -8,6 +8,7 @@ import Settings from "./settings/settings";
 import State from "./state";
 import ErrorDisplay from "./ErrorDisplay";
 import UpdateDisplay from "./update-display/update-display";
+import Sizer from './sizer';
 
 
 function AppContent() {
@@ -37,10 +38,11 @@ function StateWrapper() {
   return (
     <State>
       <div className="d-flex flex-column bg">
+        <Sizer/>
         <UpdateDisplay>
           <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
             <ErrorDisplay></ErrorDisplay>
-            <AppContent/>
+            <AppContent />
           </div>
         </UpdateDisplay>
       </div>
@@ -52,7 +54,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<StateWrapper/>}/>
+        <Route path="/" element={<StateWrapper />} />
       </Routes>
     </Router>
   );

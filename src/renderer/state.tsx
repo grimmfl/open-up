@@ -59,6 +59,7 @@ export default function State({ children }: { children: ReactElement }) {
 
   // ---------------------- AppContext ----------------------
   const [version, setVersion] = useState<string>('');
+  const [windowSize, setWindowSize] = useState<string>('lg');
 
   // ---------------------- PeerSettingsContext ----------------------
   const [peers, setPeers] = useState<Map<string, PeerPersistenceData>>(new Map<string, PeerPersistenceData>());
@@ -277,7 +278,7 @@ export default function State({ children }: { children: ReactElement }) {
                   setDarkMode,
                 }}
               >
-                <AppContext value={{version, setVersion}}>
+                <AppContext value={{version, setVersion, windowSize, setWindowSize}}>
                   <PeerSettingsContext value={{peers, setPeers}}>
                     <AudioManager>{children}</AudioManager>
                   </PeerSettingsContext>

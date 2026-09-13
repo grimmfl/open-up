@@ -7,7 +7,8 @@ import {
   useState,
 } from 'react';
 import ArrowLeftIcon from './icons/arrow-left-icon';
-import { UserContext } from './contexts';
+import { AppContext, UserContext } from './contexts';
+import ArrowUpIcon from './icons/arrow-up-icon';
 
 const SidebarValue = ['home', 'settings'] as const;
 export type SidebarValue = typeof SidebarValue[number];
@@ -31,6 +32,7 @@ export default function Sidebar(
   const [value, setValue] = useState<SidebarValue>(initial);
   const [wasOnSettings, setWasOnSettings] = useState<boolean>(false);
   const {userName} = useContext(UserContext);
+  const { windowSize} = useContext(AppContext);
 
   const SidebarItems: SidebarItem[] = [
     {
@@ -42,7 +44,7 @@ export default function Sidebar(
       content: <div className="position-relative ignore-blur"><SettingsIcon /></div>,
       additionalContent: (
           showSettingsDialog() && <div className="tooltip-dialog p-3 d-flex flex-row" style={{ left: 45, top: 40 }}>
-            <ArrowLeftIcon/>
+            { windowSize === 'xs' || windowSize === 'sm' ? <ArrowUpIcon/> : <ArrowLeftIcon/> }
             <span className="mx-2">
               Have a look at the settings to set your username and audio
               devices.

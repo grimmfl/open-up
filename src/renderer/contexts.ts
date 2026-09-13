@@ -109,9 +109,13 @@ export const UserInfoSettingsContext = createContext<{
 export const AppContext = createContext<{
   version: string,
   setVersion: Dispatch<SetStateAction<string>>,
+  windowSize: string,
+  setWindowSize: Dispatch<SetStateAction<string>>
 }>({
   version: '',
   setVersion: () => {},
+  windowSize: '',
+  setWindowSize: () => {},
 });
 
 // ---------------------- PeerSettingsContext ----------------------

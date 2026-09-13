@@ -17,3 +17,6 @@ On Mac, there will likely be an error as well. You can run the file after execut
 ```shell
 xattr -d com.apple.quarantine /path/to/file
 ```
+
+### Icons
+The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).

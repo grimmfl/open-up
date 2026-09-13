@@ -72,15 +72,6 @@ export default function State({ children }: { children: ReactElement }) {
     window.electron.ipcRenderer.on('load-data', (input) => {
       const data = validateData(input);
 
-      if (data == null) return;
-
-      setUserName(data.user.name);
-      setClientId(data.user.clientId ?? null);
-      setAudioInputDeviceId(data.devices.inputDeviceId);
-      setAudioOutputDeviceId(data.devices.outputDeviceId);
-      setPersistedRooms(new Map(data.rooms.map((r) => [r.id, r])));
-      setDarkMode(data.darkMode ?? false);
-
       navigator.mediaDevices.enumerateDevices().then((allDevices) => {
         setAudioInputDeviceId((prev) =>
           prev != null ? prev : getDefaultDevice(allDevices, 'audioinput'),
@@ -89,7 +80,10 @@ export default function State({ children }: { children: ReactElement }) {
           prev != null ? prev : getDefaultDevice(allDevices, 'audiooutput'),
         );
 
-        const connectionManager = new RTCConnectionManager(window.signalingUrl, data.user.clientId ?? null);
+        const connectionManager = new RTCConnectionManager(
+          window.signalingUrl,
+          data?.user?.clientId ?? null,
+        );
         const messageHandler = new RTCMessageHandler();
 
         messageHandler.addChatEventListener((sender, message) => {
@@ -99,7 +93,7 @@ export default function State({ children }: { children: ReactElement }) {
               fromMe: false,
               sender,
               message: message.message,
-              type: message.type
+              type: message.type,
             },
           ]);
         });
@@ -122,32 +116,50 @@ export default function State({ children }: { children: ReactElement }) {
           );
         });
 
-        connectionManager.addEventListener(RTCEventType.ChatChannel, (event) => {
-          messageHandler.addChatChannel(event.peer!, event.dataChannel!);
-        });
+        connectionManager.addEventListener(
+          RTCEventType.ChatChannel,
+          (event) => {
+            messageHandler.addChatChannel(event.peer!, event.dataChannel!);
+          },
+        );
 
         connectionManager.addEventListener(
           RTCEventType.InformationChannel,
           (event) => {
-            messageHandler.addInformationChannel(event.peer!, event.dataChannel!);
+            messageHandler.addInformationChannel(
+              event.peer!,
+              event.dataChannel!,
+            );
             messageHandler.sendInformation(informationRef.current, event.peer!);
           },
         );
 
-        connectionManager.addEventListener(RTCEventType.Disconnected, (event) => {
-          messageHandler.removeChannels(event.peer!);
-          setPeerNames((prev) => {
-            const tmp = new Map(prev.entries());
+        connectionManager.addEventListener(
+          RTCEventType.Disconnected,
+          (event) => {
+            messageHandler.removeChannels(event.peer!);
+            setPeerNames((prev) => {
+              const tmp = new Map(prev.entries());
 
-            tmp.delete(event.peer!);
+              tmp.delete(event.peer!);
 
-            return tmp;
-          });
-        });
+              return tmp;
+            });
+          },
+        );
 
         setRtcConnectionManager(connectionManager);
         setRtcMessageHandler(messageHandler);
       });
+
+      if (data == null) return;
+
+      setUserName(data.user.name);
+      setClientId(data.user.clientId ?? null);
+      setAudioInputDeviceId(data.devices.inputDeviceId);
+      setAudioOutputDeviceId(data.devices.outputDeviceId);
+      setPersistedRooms(new Map(data.rooms.map((r) => [r.id, r])));
+      setDarkMode(data.darkMode ?? false);
     });
 
     window.electron.ipcRenderer.sendMessage('load-data');

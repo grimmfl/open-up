@@ -3,6 +3,7 @@
   "version": "0.2.2",
   "license": "MIT",
   "main": "./.erb/dll/main.bundle.dev.js",
+  "desktopName": "OpenUp",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:dll": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
@@ -119,7 +120,6 @@
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",
     "asarUnpack": "**\\*.{node,dll}",
-    "desktopName": "OpenUp",
     "files": [
       "dist",
       "node_modules",
@@ -175,7 +175,9 @@
       "synopsis": "Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.",
       "description": "Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.",
       "maintainer": "Felix Grimm",
-      "executableArgs": [",--enable-features=WebContentsFocusOnResize"],
+      "executableArgs": [
+        ",--enable-features=WebContentsFocusOnResize"
+      ],
       "syncDesktopName": true
     },
     "directories": {

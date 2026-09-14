@@ -119,6 +119,7 @@
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",
     "asarUnpack": "**\\*.{node,dll}",
+    "desktopName": "OpenUp",
     "files": [
       "dist",
       "node_modules",
@@ -174,7 +175,8 @@
       "synopsis": "Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.",
       "description": "Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.",
       "maintainer": "Felix Grimm",
-      "executableArgs": [",--enable-features=WebContentsFocusOnResize"]
+      "executableArgs": [",--enable-features=WebContentsFocusOnResize"],
+      "syncDesktopName": true
     },
     "directories": {
       "app": "release/app",

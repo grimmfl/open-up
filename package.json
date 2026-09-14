@@ -166,9 +166,15 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "deb",
+        "rpm"
       ],
-      "category": "Development"
+      "category": "Development",
+      "synopsis": "Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.",
+      "description": "Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.",
+      "maintainer": "Felix Grimm",
+      "executableArgs": [",--enable-features=WebContentsFocusOnResize"]
     },
     "directories": {
       "app": "release/app",

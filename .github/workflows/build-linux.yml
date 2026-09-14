@@ -1,0 +1,90 @@
+name: Build Release - Linux
+
+permissions:
+  contents: write
+  statuses: write
+  checks: write
+
+on:
+  workflow_call:
+    secrets:
+      SIGNALING_URL:
+        required: true
+      GH_TOKEN:
+        required: true
+
+env:
+  SIGNALING_URL: ${{ secrets.SIGNALING_URL }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Setup rpm
+        run: apt install rpm
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: get-npm-version
+        id: get-version
+        uses: beaconbrigade/package-json-version@v0.3.2
+        with:
+          path: .
+
+      - name: Write .env
+        run: echo SIGNALING_URL=${{ secrets.SIGNALING_URL }} > .erb/.env
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Build Electron
+        run: npm run app:dist
+
+      - name: Show DIR
+        run: ls release/build
+
+      - name: Upload rpm
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          file: release/build/OpenUp.rpm
+          asset_name: OpenUp.rpm
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: ""
+
+      - name: Upload deb
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          file: release/build/OpenUp.deb
+          asset_name: OpenUp.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: ""
+
+      - name: Upload AppImage
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GH_TOKEN }}
+          file: release/build/OpenUp.AppImage
+          asset_name: OpenUp.AppImage
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: ""
+
+

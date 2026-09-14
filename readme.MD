@@ -25,4 +25,4 @@ The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).
 - Set version in package.json and release/package.json
 - run ```npm install```
 - Push
-- Run Worfklow in GH
+- Run ```git tag v0.2.2```

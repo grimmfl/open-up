@@ -34,7 +34,7 @@ jobs:
           cache: 'npm'
 
       - name: Setup rpm
-        run: apt install rpm
+        run: sudo apt install -y rpm
 
       - name: Install Dependencies
         run: npm ci --legacy-peer-deps

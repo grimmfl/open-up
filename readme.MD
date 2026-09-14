@@ -30,3 +30,6 @@ The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).
 git tag v0.2.2
 git push origin tag v0.2.2
 ```
+
+### Deleting a tag
+```git push origin :refs/tags/v0.2.2```

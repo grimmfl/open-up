@@ -25,4 +25,8 @@ The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).
 - Set version in package.json and release/package.json
 - run ```npm install```
 - Push
-- Run ```git tag v0.2.2```
+- Create a tag
+```
+git tag v0.2.2
+git push origin tag v0.2.2
+```

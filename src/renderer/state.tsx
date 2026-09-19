@@ -48,6 +48,7 @@ export default function State({ children }: { children: ReactElement }) {
   const [persistedRooms, setPersistedRooms] = useState(
     new Map<string, RoomPersistenceData>(),
   );
+  const [peersTalking, setPeersTalking] = useState<Set<string>>(new Set<string>());
 
   // ---------------------- UserContext ----------------------
   const [userName, setUserName] = useState<string>('');
@@ -260,6 +261,8 @@ export default function State({ children }: { children: ReactElement }) {
               setPeerNames,
               persistedRooms,
               setPersistedRooms,
+              peersTalking,
+              setPeersTalking
             }}
           >
             <UserContext

@@ -1,9 +1,11 @@
 import {useContext, useEffect, useRef, useState} from "react";
-import {PeerSettingsContext, RoomContext} from "../../contexts";
+import { PeerSettingsContext, RoomContext, UserContext } from '../../contexts';
 import {alterMapState} from "../../../shared/utils";
+import CircleIcon from '../../icons/circle-icon';
 
 export default function PeersDisplay() {
-  const {peerNames} = useContext(RoomContext);
+  const {peerNames, peersTalking} = useContext(RoomContext);
+  const { userName, clientId } = useContext(UserContext);
   const {setPeers} = useContext(PeerSettingsContext);
 
   const [peerMenu, setPeerMenu] = useState<string | null>(null);
@@ -11,6 +13,11 @@ export default function PeersDisplay() {
   const [peerVolume, setPeerVolume] = useState(100);
 
   const peerMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const peers = Array
+    .from(peerNames.entries())
+    .concat([[clientId ?? '', userName]])
+    .sort(([_, a], [__, b]) => a.localeCompare(b));
 
   useEffect(() => {
     document.addEventListener('mousedown', evt => {
@@ -40,10 +47,13 @@ export default function PeersDisplay() {
   return (
     <table className="table">
       <tbody>
-      {Array.from(peerNames.entries()).map(([peerId, peerName], index) =>
+      {peers.map(([peerId, peerName], index) =>
         <tr key={`peer${index}`}>
-          <td onClick={() => openPeerMenu(peerId)}>
-            {peerName}
+          <td className="d-flex align-items-center" onClick={() => openPeerMenu(peerId)}>
+            <div className="d-flex align-items-center" style={{width: '16px'}}>
+              {peersTalking.has(peerId) && <CircleIcon width={16} height={16}/>}
+            </div>
+            <div className="ms-2">{peerName}</div>
             {peerId == peerMenu &&
               <div className="peer-menu d-flex flex-column" ref={peerMenuRef}>
                 <div className="p-2">

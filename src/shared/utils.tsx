@@ -5,3 +5,11 @@ export function alterMapState<K, V>(map: Map<K, V>, action: ((m: Map<K, V>) => v
 
   return tmp;
 }
+
+export function alterSetState<V>(set: Set<V>, action: ((s: Set<V>) => void )) {
+  const tmp = new Set(set.values());
+
+  action(tmp);
+
+  return tmp;
+}

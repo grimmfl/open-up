@@ -66,6 +66,8 @@ export const RoomContext = createContext<{
   setPeerNames: Dispatch<SetStateAction<Map<string, string>>>,
   persistedRooms: Map<string, RoomPersistenceData>,
   setPersistedRooms: Dispatch<SetStateAction<Map<string, RoomPersistenceData>>>,
+  peersTalking: Set<string>,
+  setPeersTalking: Dispatch<SetStateAction<Set<string>>>
 }>({
   roomCodeInput: '',
   setRoomCodeInput: () => {},
@@ -76,7 +78,9 @@ export const RoomContext = createContext<{
   peerNames: new Map<string, string>(),
   setPeerNames: () => {},
   persistedRooms: new Map<string, RoomPersistenceData>(),
-  setPersistedRooms: () => {}
+  setPersistedRooms: () => {},
+  peersTalking: new Set<string>,
+  setPeersTalking: () => {}
 });
 
 // ---------------------- UserContext ----------------------

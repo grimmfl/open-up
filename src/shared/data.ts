@@ -17,6 +17,7 @@ export interface PersistenceData {
     inputDeviceId: string;
     outputDeviceId: string;
     inputThreshold?: number;
+    outputCutoff?: number;
   };
   rooms: RoomPersistenceData[];
   darkMode?: boolean;
@@ -94,10 +95,15 @@ function validateDevices(
     return validationError(data.inputThreshold, [...path, 'inputThreshold']);
   }
 
+  if (data.outputCutoff != null && typeof data.outputCutoff !== 'number') {
+    return validationError(data.outputCutoff, [...path, 'outputCutoff']);
+  }
+
   return {
     inputDeviceId: data.inputDeviceId,
     outputDeviceId: data.outputDeviceId,
     inputThreshold: data.inputThreshold,
+    outputCutoff: data.outputCutoff,
   };
 }
 

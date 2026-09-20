@@ -44,6 +44,7 @@ export default function State({ children }: { children: ReactElement }) {
   const [isInputMuted, setIsInputMuted] = useState<boolean>(false);
   const [isOutputMuted, setIsOutputMuted] = useState<boolean>(false);
   const [inputThreshold, setInputThreshold] = useState<number>(0);
+  const [outputCutoff, setOutputCutoff] = useState<number>(100);
 
   // ---------------------- RTCContext ----------------------
   const [rtcConnectionManager, setRtcConnectionManager] =
@@ -182,6 +183,7 @@ export default function State({ children }: { children: ReactElement }) {
       setPersistedRooms(new Map(data.rooms.map((r) => [r.id, r])));
       setDarkMode(data.darkMode ?? false);
       setInputThreshold(data.devices.inputThreshold ?? 0);
+      setOutputCutoff(data.devices.outputCutoff ?? 100);
     });
 
     window.electron.ipcRenderer.sendMessage('load-data');
@@ -213,6 +215,7 @@ export default function State({ children }: { children: ReactElement }) {
         inputDeviceId: audioInputDeviceId,
         outputDeviceId: audioOutputDeviceId,
         inputThreshold,
+        outputCutoff,
       },
       rooms: Array.from(persistedRooms.values()),
       darkMode,
@@ -229,6 +232,7 @@ export default function State({ children }: { children: ReactElement }) {
     darkMode,
     peers,
     inputThreshold,
+    outputCutoff,
   ]);
 
   useEffect(() => {
@@ -255,6 +259,8 @@ export default function State({ children }: { children: ReactElement }) {
         setIsOutputMuted,
         inputThreshold,
         setInputThreshold,
+        outputCutoff,
+        setOutputCutoff,
       }}
     >
       <RTCContext

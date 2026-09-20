@@ -19,9 +19,11 @@ export default function Settings() {
   const { version } = useContext(AppContext);
   const { clientId } = useContext(UserContext);
   const { peerVolumes } = useContext(RoomContext);
-  const { inputThreshold, setInputThreshold } = useContext(DeviceContext);
+  const { inputThreshold, setInputThreshold, outputCutoff, setOutputCutoff } =
+    useContext(DeviceContext);
 
   const inputThresholdSliderRef = useRef<HTMLInputElement>(null);
+  const outputCutoffSliderRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const slider = inputThresholdSliderRef.current;
@@ -32,6 +34,21 @@ export default function Settings() {
 
     slider.style.setProperty('--volume', `${volume}%`);
   }, [peerVolumes, clientId, inputThresholdSliderRef]);
+
+  useEffect(() => {
+    const slider = outputCutoffSliderRef.current;
+
+    if (clientId == null || slider == null) return;
+
+    const volume = Math.max(
+      0,
+      ...Array.from(peerVolumes.entries())
+        .filter(([p]) => p !== clientId)
+        .map(([_, v]) => v),
+    );
+
+    slider.style.setProperty('--volume', `${volume}%`);
+  }, [peerVolumes, clientId, outputCutoffSliderRef]);
 
   function exportSettings() {
     window.electron.ipcRenderer.sendMessage('export-settings');
@@ -74,6 +91,17 @@ export default function Settings() {
           deviceKind="audiooutput"
           onSelect={setAudioOutputDeviceId}
           initial={audioOutputDeviceId}
+        />
+        Cutoff
+        <input
+          id="output-cutoff-slider"
+          type="range"
+          value={outputCutoff}
+          onChange={(e) => setOutputCutoff(e.target.valueAsNumber)}
+          min={0}
+          max={100}
+          className="w-100"
+          ref={outputCutoffSliderRef}
         />
       </div>
 

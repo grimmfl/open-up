@@ -332,3 +332,16 @@ input[type="range"] {
       var(--color-background-darker) calc(var(--volume) + 0.1%)
     ) !important;
 }
+
+#output-cutoff-slider {
+  --volume: 0%;
+}
+
+#output-cutoff-slider::-webkit-slider-runnable-track {
+  background: transparent
+    linear-gradient(
+      90deg,
+      var(--color-primary) var(--volume),
+      var(--color-background-darker) calc(var(--volume) + 0.1%)
+    ) !important;
+}

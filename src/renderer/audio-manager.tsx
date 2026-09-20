@@ -12,6 +12,7 @@ import { alterMapState } from '../shared/utils';
 interface UserAudio {
   source: MediaStreamAudioSourceNode;
   analyser: AnalyserNode;
+  cutoffGain: GainNode;
   gain: GainNode;
   dataArray: Uint8Array<ArrayBuffer>;
 }
@@ -27,7 +28,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
   const { peers } = useContext(PeerSettingsContext);
   const { setPeerVolumes } = useContext(RoomContext);
   const { clientId } = useContext(UserContext);
-  const { inputThreshold } = useContext(DeviceContext);
+  const { inputThreshold, outputCutoff } = useContext(DeviceContext);
 
   const [outputAudios, setOutputAudios] = useState(
     new Map<string, UserAudio>(),
@@ -44,7 +45,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
         sum += amplitude * amplitude;
       }
 
-      return Math.sqrt(sum / audio.dataArray.length);
+      return (Math.sqrt(sum / audio.dataArray.length) / 255) * 100;
     }
 
     function applyInputThreshold() {
@@ -61,19 +62,37 @@ export default function AudioManager({ children }: { children: ReactElement }) {
       );
     }
 
-    function calculateVolume() {
-      applyInputThreshold();
+    function applyOutputCutoff(volumes: Map<string, number>) {
+      for (const [peer, volume] of volumes.entries()) {
+        if (peer === clientId) continue;
 
-      for (const [peer, audio] of outputAudios.entries()) {
-        setPeerVolumes((prev) =>
-          alterMapState(prev, (peers) => peers.set(peer, getVolume(audio))),
+        const audio = outputAudios.get(peer)!;
+
+        audio.cutoffGain.gain.setValueAtTime(
+          volume < outputCutoff ? 1 : outputCutoff / volume,
+          audioContext.currentTime,
         );
       }
-
-      requestAnimationFrame(() => calculateVolume());
     }
 
-    calculateVolume();
+    function modifyAudio() {
+      applyInputThreshold();
+
+      const volumes = new Map(
+        Array.from(outputAudios.entries()).map(([peer, audio]) => [
+          peer,
+          getVolume(audio),
+        ]),
+      );
+
+      applyOutputCutoff(volumes);
+
+      setPeerVolumes(volumes);
+
+      requestAnimationFrame(() => modifyAudio());
+    }
+
+    modifyAudio();
   }, []);
 
   useEffect(() => {
@@ -105,6 +124,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           audios.set(clientId!, {
             source,
             analyser,
+            cutoffGain: audioContext.createGain(),
             gain,
             dataArray: new Uint8Array(analyser.frequencyBinCount),
           });
@@ -133,10 +153,12 @@ export default function AudioManager({ children }: { children: ReactElement }) {
 
           const source = audioContext.createMediaStreamSource(remoteStream!);
           const analyser = audioContext.createAnalyser();
+          const cutoffGain = audioContext.createGain();
           const gain = audioContext.createGain();
 
           source.connect(analyser);
-          analyser.connect(gain);
+          analyser.connect(cutoffGain);
+          cutoffGain.connect(gain);
           gain.connect(audioContext.destination);
 
           gain.gain.setValueAtTime(
@@ -147,6 +169,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           audios.set(peer!, {
             source,
             analyser,
+            cutoffGain,
             gain,
             dataArray: new Uint8Array(analyser.frequencyBinCount),
           });

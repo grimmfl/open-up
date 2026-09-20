@@ -30,7 +30,7 @@ export default function DeviceSelect({
   }
 
   return (
-    <div>
+    <div style={{ height: '25px !important', overflow: 'hidden' }}>
       <table className="table table-selectable">
         <thead></thead>
         <tbody>

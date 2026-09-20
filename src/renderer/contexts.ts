@@ -16,6 +16,8 @@ export const DeviceContext = createContext<{
   setIsOutputMuted: Dispatch<SetStateAction<boolean>>;
   inputThreshold: number;
   setInputThreshold: Dispatch<SetStateAction<number>>;
+  outputCutoff: number;
+  setOutputCutoff: Dispatch<SetStateAction<number>>;
 }>({
   audioInputDeviceId: null,
   setAudioInputDeviceId: () => {},
@@ -27,6 +29,8 @@ export const DeviceContext = createContext<{
   setIsOutputMuted: () => {},
   inputThreshold: 0,
   setInputThreshold: () => {},
+  outputCutoff: 100,
+  setOutputCutoff: () => {},
 });
 
 // ---------------------- RTCConnectionManagerContext ----------------------

@@ -26,7 +26,8 @@ let mainWindow: BrowserWindow | null = null;
 ipcMain.on('load-data', async (event) => {
   const data = load();
 
-  nativeTheme.themeSource = data?.darkMode ?? nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+  nativeTheme.themeSource =
+    (data?.darkMode ?? nativeTheme.shouldUseDarkColors) ? 'dark' : 'light';
 
   if (data != null && data?.darkMode == null) {
     data.darkMode = nativeTheme.shouldUseDarkColors;

@@ -57,34 +57,12 @@ jobs:
       - name: Show DIR
         run: ls release/build
 
-      - name: Upload rpm
+      - name: Upload Binaries
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
-          file: release/build/OpenUp.rpm
-          asset_name: OpenUp.rpm
+          file: release/build/*.{rpm,deb,AppImage,yml}
+          file_glob: true
           tag: ${{ github.ref }}
           overwrite: true
-          body: ""
-
-      - name: Upload deb
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GH_TOKEN }}
-          file: release/build/OpenUp.deb
-          asset_name: OpenUp.deb
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: ""
-
-      - name: Upload AppImage
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GH_TOKEN }}
-          file: release/build/OpenUp.AppImage
-          asset_name: OpenUp.AppImage
-          tag: ${{ github.ref }}
-          overwrite: true
-          body: ""
-
 

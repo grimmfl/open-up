@@ -7,7 +7,7 @@ import {
   UserContext,
 } from './contexts';
 import { RTCEventType } from '../rtc/connection-manager';
-import { alterSetState } from '../shared/utils';
+import { alterMapState } from '../shared/utils';
 
 interface UserAudio {
   source: MediaStreamAudioSourceNode;
@@ -17,8 +17,6 @@ interface UserAudio {
 }
 
 export default function AudioManager({ children }: { children: ReactElement }) {
-  const talkingThreshold = 15;
-
   const {
     audioInputDeviceId,
     audioOutputDeviceId,
@@ -27,8 +25,9 @@ export default function AudioManager({ children }: { children: ReactElement }) {
   } = useContext(DeviceContext);
   const { rtcConnectionManager } = useContext(RTCContext);
   const { peers } = useContext(PeerSettingsContext);
-  const { setPeersTalking } = useContext(RoomContext);
+  const { setPeerVolumes } = useContext(RoomContext);
   const { clientId } = useContext(UserContext);
+  const { inputThreshold } = useContext(DeviceContext);
 
   const [outputAudios, setOutputAudios] = useState(
     new Map<string, UserAudio>(),
@@ -37,26 +36,38 @@ export default function AudioManager({ children }: { children: ReactElement }) {
   const [audioContext] = useState<AudioContext>(() => new AudioContext());
 
   useEffect(() => {
+    function getVolume(audio: UserAudio): number {
+      audio.analyser.getByteFrequencyData(audio.dataArray);
+
+      let sum = 0;
+      for (const amplitude of audio.dataArray) {
+        sum += amplitude * amplitude;
+      }
+
+      return Math.sqrt(sum / audio.dataArray.length);
+    }
+
+    function applyInputThreshold() {
+      if (clientId == null) return;
+      const input = outputAudios.get(clientId);
+
+      if (input == null) return;
+
+      const volume = getVolume(input);
+
+      input.gain.gain.setValueAtTime(
+        volume > inputThreshold ? 1 : 0,
+        audioContext.currentTime,
+      );
+    }
+
     function calculateVolume() {
+      applyInputThreshold();
+
       for (const [peer, audio] of outputAudios.entries()) {
-        audio.analyser.getByteFrequencyData(audio.dataArray);
-
-        let sum = 0;
-        for (const amplitude of audio.dataArray) {
-          sum += amplitude * amplitude;
-        }
-
-        const volume = Math.sqrt(sum / audio.dataArray.length);
-
-        setPeersTalking((peers) => {
-          if (volume < talkingThreshold && peers.has(peer)) {
-            return alterSetState(peers, (p) => p.delete(peer));
-          } else if (volume >= talkingThreshold && !peers.has(peer)) {
-            return alterSetState(peers, (p) => p.add(peer));
-          }
-
-          return peers;
-        });
+        setPeerVolumes((prev) =>
+          alterMapState(prev, (peers) => peers.set(peer, getVolume(audio))),
+        );
       }
 
       requestAnimationFrame(() => calculateVolume());
@@ -83,8 +94,13 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           const source = audioContext.createMediaStreamSource(stream);
           const analyser = audioContext.createAnalyser();
           const gain = audioContext.createGain();
+          const target = audioContext.createMediaStreamDestination();
 
           source.connect(analyser);
+          analyser.connect(gain);
+          gain.connect(target);
+
+          rtcConnectionManager.setAudioInput(target.stream);
 
           audios.set(clientId!, {
             source,
@@ -95,8 +111,6 @@ export default function AudioManager({ children }: { children: ReactElement }) {
 
           return audios;
         });
-
-        rtcConnectionManager.setAudioInput(stream);
       });
   }, [audioInputDeviceId, rtcConnectionManager]);
 

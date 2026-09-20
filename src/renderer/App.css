@@ -319,3 +319,16 @@ input[type="range"] {
   appearance: none !important;
   background: transparent !important;
 }
+
+#input-threshold-slider {
+  --volume: 0%;
+}
+
+#input-threshold-slider::-webkit-slider-runnable-track {
+  background: transparent
+    linear-gradient(
+      90deg,
+      var(--color-primary) var(--volume),
+      var(--color-background-darker) calc(var(--volume) + 0.1%)
+    ) !important;
+}

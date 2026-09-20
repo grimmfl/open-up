@@ -1,6 +1,11 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import DeviceSelect from './device-select';
-import { AppContext, DeviceContext } from '../contexts';
+import {
+  AppContext,
+  DeviceContext,
+  RoomContext,
+  UserContext,
+} from '../contexts';
 import UserInfoSettings from './user-info/user-info-settings';
 
 export default function Settings() {
@@ -12,6 +17,21 @@ export default function Settings() {
   } = useContext(DeviceContext);
 
   const { version } = useContext(AppContext);
+  const { clientId } = useContext(UserContext);
+  const { peerVolumes } = useContext(RoomContext);
+  const { inputThreshold, setInputThreshold } = useContext(DeviceContext);
+
+  const inputThresholdSliderRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const slider = inputThresholdSliderRef.current;
+
+    if (clientId == null || slider == null) return;
+
+    const volume = peerVolumes.get(clientId) ?? 0;
+
+    slider.style.setProperty('--volume', `${volume}%`);
+  }, [peerVolumes, clientId, inputThresholdSliderRef]);
 
   return (
     <div>
@@ -26,6 +46,17 @@ export default function Settings() {
           deviceKind="audioinput"
           onSelect={setAudioInputDeviceId}
           initial={audioInputDeviceId}
+        />
+
+        <input
+          id="input-threshold-slider"
+          type="range"
+          value={inputThreshold}
+          onChange={(e) => setInputThreshold(e.target.valueAsNumber)}
+          min={0}
+          max={100}
+          className="w-100"
+          ref={inputThresholdSliderRef}
         />
       </div>
 

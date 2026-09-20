@@ -14,6 +14,8 @@ export const DeviceContext = createContext<{
   setAudioOutputDeviceId: Dispatch<SetStateAction<string | null>>;
   isOutputMuted: boolean;
   setIsOutputMuted: Dispatch<SetStateAction<boolean>>;
+  inputThreshold: number;
+  setInputThreshold: Dispatch<SetStateAction<number>>;
 }>({
   audioInputDeviceId: null,
   setAudioInputDeviceId: () => {},
@@ -23,6 +25,8 @@ export const DeviceContext = createContext<{
   setAudioOutputDeviceId: () => {},
   isOutputMuted: false,
   setIsOutputMuted: () => {},
+  inputThreshold: 0,
+  setInputThreshold: () => {},
 });
 
 // ---------------------- RTCConnectionManagerContext ----------------------
@@ -65,8 +69,8 @@ export const RoomContext = createContext<{
   setPeerNames: Dispatch<SetStateAction<Map<string, string>>>;
   persistedRooms: Map<string, RoomPersistenceData>;
   setPersistedRooms: Dispatch<SetStateAction<Map<string, RoomPersistenceData>>>;
-  peersTalking: Set<string>;
-  setPeersTalking: Dispatch<SetStateAction<Set<string>>>;
+  peerVolumes: Map<string, number>;
+  setPeerVolumes: Dispatch<SetStateAction<Map<string, number>>>;
 }>({
   roomCodeInput: '',
   setRoomCodeInput: () => {},
@@ -78,8 +82,8 @@ export const RoomContext = createContext<{
   setPeerNames: () => {},
   persistedRooms: new Map<string, RoomPersistenceData>(),
   setPersistedRooms: () => {},
-  peersTalking: new Set<string>(),
-  setPeersTalking: () => {},
+  peerVolumes: new Map<string, number>(),
+  setPeerVolumes: () => {},
 });
 
 // ---------------------- UserContext ----------------------

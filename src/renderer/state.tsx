@@ -43,6 +43,7 @@ export default function State({ children }: { children: ReactElement }) {
   );
   const [isInputMuted, setIsInputMuted] = useState<boolean>(false);
   const [isOutputMuted, setIsOutputMuted] = useState<boolean>(false);
+  const [inputThreshold, setInputThreshold] = useState<number>(0);
 
   // ---------------------- RTCContext ----------------------
   const [rtcConnectionManager, setRtcConnectionManager] =
@@ -62,8 +63,8 @@ export default function State({ children }: { children: ReactElement }) {
   const [persistedRooms, setPersistedRooms] = useState(
     new Map<string, RoomPersistenceData>(),
   );
-  const [peersTalking, setPeersTalking] = useState<Set<string>>(
-    new Set<string>(),
+  const [peerVolumes, setPeerVolumes] = useState<Map<string, number>>(
+    new Map<string, number>(),
   );
 
   // ---------------------- UserContext ----------------------
@@ -180,6 +181,7 @@ export default function State({ children }: { children: ReactElement }) {
       setAudioOutputDeviceId(data.devices.outputDeviceId);
       setPersistedRooms(new Map(data.rooms.map((r) => [r.id, r])));
       setDarkMode(data.darkMode ?? false);
+      setInputThreshold(data.devices.inputThreshold ?? 0);
     });
 
     window.electron.ipcRenderer.sendMessage('load-data');
@@ -210,6 +212,7 @@ export default function State({ children }: { children: ReactElement }) {
       devices: {
         inputDeviceId: audioInputDeviceId,
         outputDeviceId: audioOutputDeviceId,
+        inputThreshold,
       },
       rooms: Array.from(persistedRooms.values()),
       darkMode,
@@ -225,6 +228,7 @@ export default function State({ children }: { children: ReactElement }) {
     persistedRooms,
     darkMode,
     peers,
+    inputThreshold,
   ]);
 
   useEffect(() => {
@@ -249,6 +253,8 @@ export default function State({ children }: { children: ReactElement }) {
         setAudioOutputDeviceId: setAudioOutputDeviceId,
         isOutputMuted,
         setIsOutputMuted,
+        inputThreshold,
+        setInputThreshold,
       }}
     >
       <RTCContext
@@ -279,8 +285,8 @@ export default function State({ children }: { children: ReactElement }) {
               setPeerNames,
               persistedRooms,
               setPersistedRooms,
-              peersTalking,
-              setPeersTalking,
+              peerVolumes,
+              setPeerVolumes,
             }}
           >
             <UserContext

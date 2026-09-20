@@ -1,12 +1,20 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { PeerSettingsContext, RoomContext, UserContext } from '../../contexts';
+import {
+  DeviceContext,
+  PeerSettingsContext,
+  RoomContext,
+  UserContext,
+} from '../../contexts';
 import { alterMapState } from '../../../shared/utils';
 import CircleIcon from '../../icons/circle-icon';
 
+const TalkingThreshold = 15;
+
 export default function PeersDisplay() {
-  const { peerNames, peersTalking } = useContext(RoomContext);
+  const { peerNames, peerVolumes } = useContext(RoomContext);
   const { userName, clientId } = useContext(UserContext);
   const { setPeers } = useContext(PeerSettingsContext);
+  const { inputThreshold } = useContext(DeviceContext);
 
   const [peerMenu, setPeerMenu] = useState<string | null>(null);
 
@@ -45,6 +53,12 @@ export default function PeersDisplay() {
     );
   }
 
+  function isTalking(peer: string): boolean {
+    const volume = peerVolumes.get(peer) ?? 0;
+
+    return volume >= (peer === clientId ? inputThreshold : TalkingThreshold);
+  }
+
   return (
     <table className="table">
       <tbody>
@@ -58,9 +72,7 @@ export default function PeersDisplay() {
                 className="d-flex align-items-center"
                 style={{ width: '16px' }}
               >
-                {peersTalking.has(peerId) && (
-                  <CircleIcon width={16} height={16} />
-                )}
+                {isTalking(peerId) && <CircleIcon width={16} height={16} />}
               </div>
               <div className="ms-2">{peerName}</div>
               {peerId == peerMenu && (

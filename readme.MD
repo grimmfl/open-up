@@ -2,11 +2,17 @@
 Open Up is a free, privacy-first and open-source voice chat based on the WebRTC standard.
 
 ### Download
+Download for your OS [here](https://github.com/grimmfl/open-up/releases/latest/download).
 
-| OS                                                                                | Auto Update |
-|-----------------------------------------------------------------------------------|--------------|
-| [Windows](https://github.com/grimmfl/open-up/releases/latest/download/OpenUp.exe) | ✅ Yes        |
-| [Mac OS](https://github.com/grimmfl/open-up/releases/latest/download/OpenUp.dmg)  | ❌ No         |
+Supported OS:
+
+| OS           | Auto Update |
+|--------------|-------------|
+| Windows      | ✅ Yes      |
+| Mac OS       | ❌ No       |
+| Debian-based | ❌ No       |
+| Rpm-based    | ❌ No       |
+| AppImage     | ❌ No       |
 
 ### Notes
 The app is not signed, because certificates cost at least 70$ per year per OS.
@@ -22,6 +28,7 @@ xattr -d com.apple.quarantine /path/to/file
 The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).
 
 ### Build process
+- Run npm run licenses
 - Set version in package.json and release/package.json
 - run ```npm install```
 - Push

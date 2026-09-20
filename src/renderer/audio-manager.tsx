@@ -117,7 +117,6 @@ export default function AudioManager({ children }: { children: ReactElement }) {
   useEffect(() => {
     if (rtcConnectionManager == null) return;
 
-    // TODO close audio on connection close
     rtcConnectionManager.addEventListener(
       RTCEventType.RemoteStream,
       async ({ peer, remoteStream }) => {
@@ -153,6 +152,23 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           });
 
           return audios;
+        });
+      },
+    );
+
+    rtcConnectionManager.addEventListener(
+      RTCEventType.Disconnected,
+      ({ peer }) => {
+        setOutputAudios((audios) => {
+          const audio = audios.get(peer!);
+
+          if (audio != null) {
+            audio.source.disconnect();
+            audio.analyser.disconnect();
+            audio.gain.disconnect();
+          }
+
+          return alterMapState(audios, (prev) => prev.delete(peer!));
         });
       },
     );

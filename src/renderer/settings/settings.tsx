@@ -33,6 +33,14 @@ export default function Settings() {
     slider.style.setProperty('--volume', `${volume}%`);
   }, [peerVolumes, clientId, inputThresholdSliderRef]);
 
+  function exportSettings() {
+    window.electron.ipcRenderer.sendMessage('export-settings');
+  }
+
+  function importSettings() {
+    window.electron.ipcRenderer.sendMessage('import-settings');
+  }
+
   return (
     <div>
       <div>
@@ -67,6 +75,23 @@ export default function Settings() {
           onSelect={setAudioOutputDeviceId}
           initial={audioOutputDeviceId}
         />
+      </div>
+
+      <div className="mt-5 d-flex justify-content-between gap-2">
+        <button
+          type="button"
+          className="btn flex-grow-1"
+          onClick={importSettings}
+        >
+          Import
+        </button>
+        <button
+          type="button"
+          className="btn flex-grow-1"
+          onClick={exportSettings}
+        >
+          Export
+        </button>
       </div>
 
       <div className="mt-5">

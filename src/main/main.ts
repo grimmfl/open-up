@@ -9,19 +9,39 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'node:path';
-import { app, BrowserWindow, shell, ipcMain, nativeTheme } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  nativeTheme,
+  dialog,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { load, save } from './persistence';
 import dotenv from 'dotenv';
+import electronDl, { download } from 'electron-dl';
+import fs from 'node:fs';
+import { validateData } from '../shared/data';
+
+electronDl();
 
 class AppUpdater {
   constructor() {}
 }
 
 let mainWindow: BrowserWindow | null = null;
+
+function saveData(data: any) {
+  save(data, (data) => {
+    if (data.darkMode != null) {
+      nativeTheme.themeSource = data.darkMode ? 'dark' : 'light';
+    }
+  });
+}
 
 ipcMain.on('load-data', async (event) => {
   const data = load();
@@ -37,15 +57,50 @@ ipcMain.on('load-data', async (event) => {
 });
 
 ipcMain.on('save-data', async (_, data) => {
-  save(data, (data) => {
-    if (data.darkMode != null) {
-      nativeTheme.themeSource = data.darkMode ? 'dark' : 'light';
-    }
-  });
+  saveData(data);
 });
 
 ipcMain.on('open-link', async (_, data) => {
   await shell.openExternal(data);
+});
+
+ipcMain.on('export-settings', async () => {
+  const data = load();
+
+  try {
+    await download(
+      BrowserWindow.getFocusedWindow()!,
+      `data:application/json;base64,${Buffer.from(JSON.stringify(data)).toString('base64')}`,
+      {
+        filename: 'settings.json',
+        openFolderWhenDone: true,
+      },
+    );
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+ipcMain.on('import-settings', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'Settings JSON', extensions: ['json'] }],
+  });
+
+  if (result.canceled || result.filePaths.length === 0) return;
+
+  const data = validateData(
+    JSON.parse(fs.readFileSync(result.filePaths[0]).toString()),
+  );
+
+  if (data == null) {
+    mainWindow?.webContents.send('error', 'Setting file corrupted.');
+    return;
+  }
+
+  saveData(data);
+
+  mainWindow?.webContents.send('load-data', data);
 });
 
 if (process.env.NODE_ENV === 'production') {

@@ -5,37 +5,40 @@ import {
   SignalingMessageType,
 } from '../rtc/signaling/messages';
 import { RTCEventType } from '../rtc/connection-manager';
+import { alterMapState } from '../shared/utils';
 
 export default function ErrorDisplay() {
   const { rtcConnectionManager } = useContext(RTCContext);
 
   const [errors, setErrors] = useState(new Map<string, string>());
 
+  function addError(message: string) {
+    const id = crypto.randomUUID().toString();
+
+    setErrors((prev) =>
+      alterMapState(prev, (errors) => errors.set(id, message)),
+    );
+
+    setTimeout(() => {
+      setErrors((prev) => alterMapState(prev, (errors) => errors.delete(id)));
+    }, 3000);
+  }
+
   useEffect(() => {
     if (rtcConnectionManager == null) return;
 
     rtcConnectionManager.addEventListener(
       RTCEventType.Message,
-      ({ message }) => {
-        const id = crypto.randomUUID().toString();
-
-        setErrors((prev) => {
-          const tmp = new Map(prev.entries());
-          tmp.set(id, (message as SignalingError).message);
-          return tmp;
-        });
-
-        setTimeout(() => {
-          setErrors((prev) => {
-            const tmp = new Map(prev.entries());
-            tmp.delete(id);
-            return tmp;
-          });
-        }, 3000);
-      },
+      ({ message }) => addError((message as SignalingError).message),
       { messageType: SignalingMessageType.Error },
     );
   }, [rtcConnectionManager]);
+
+  useEffect(() => {
+    window.electron.ipcRenderer.on('error', (data) => {
+      addError(data as string);
+    });
+  }, []);
 
   return (
     <div className="position-absolute start-50">

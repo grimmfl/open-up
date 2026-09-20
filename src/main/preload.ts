@@ -9,7 +9,10 @@ export type Channels =
   | 'install'
   | 'install-on-quit'
   | 'version'
-  | 'open-link';
+  | 'open-link'
+  | 'import-settings'
+  | 'export-settings'
+  | 'error';
 
 const electronHandler = {
   ipcRenderer: {

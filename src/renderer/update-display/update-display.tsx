@@ -1,5 +1,5 @@
 import { UpdateDisplayManual } from './update-display-manual';
-import { ReactElement, useState } from 'react';
+import { type ReactElement, useState } from 'react';
 import UpdateDisplayAuto from './update-display-auto';
 
 export default function UpdateDisplay({

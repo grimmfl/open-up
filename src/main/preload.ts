@@ -1,6 +1,15 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 
-export type Channels = 'load-data' | 'save-data' | 'manual-update' | 'auto-update' | 'auto-update-progress' | 'install' | 'install-on-quit' | 'version' | 'open-link';
+export type Channels =
+  | 'load-data'
+  | 'save-data'
+  | 'manual-update'
+  | 'auto-update'
+  | 'auto-update-progress'
+  | 'install'
+  | 'install-on-quit'
+  | 'version'
+  | 'open-link';
 
 const electronHandler = {
   ipcRenderer: {
@@ -18,8 +27,8 @@ const electronHandler = {
     },
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
-    }
-  }
+    },
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

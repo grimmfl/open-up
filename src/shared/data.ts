@@ -25,7 +25,6 @@ export interface PersistenceData {
 export const ValidationError = null;
 export type ValidationError = typeof ValidationError;
 
-
 export function validateData(data: any): PersistenceData | ValidationError {
   if (data == null) return ValidationError;
 
@@ -38,18 +37,27 @@ export function validateData(data: any): PersistenceData | ValidationError {
     return validationError(data.darkMode, ['darkMode']);
   }
 
-  if (user === ValidationError || devices === ValidationError || rooms === ValidationError || peers === ValidationError) return ValidationError;
+  if (
+    user === ValidationError ||
+    devices === ValidationError ||
+    rooms === ValidationError ||
+    peers === ValidationError
+  )
+    return ValidationError;
 
   return {
     user,
     devices,
     rooms,
     darkMode: data.darkMode,
-    peers
+    peers,
   };
 }
 
-function validateUser(data: any, path: string[]): PersistenceData['user'] | ValidationError {
+function validateUser(
+  data: any,
+  path: string[],
+): PersistenceData['user'] | ValidationError {
   if (data == null) {
     return validationError(data, path);
   }
@@ -65,7 +73,10 @@ function validateUser(data: any, path: string[]): PersistenceData['user'] | Vali
   return { name: data.name, clientId: data.clientId };
 }
 
-function validateDevices(data: any, path: string[]): PersistenceData['devices'] | ValidationError {
+function validateDevices(
+  data: any,
+  path: string[],
+): PersistenceData['devices'] | ValidationError {
   if (data == null) {
     return validationError(data, path);
   }
@@ -84,7 +95,10 @@ function validateDevices(data: any, path: string[]): PersistenceData['devices'] 
   };
 }
 
-function validateRooms(data: any, path: string[]): RoomPersistenceData[] | ValidationError {
+function validateRooms(
+  data: any,
+  path: string[],
+): RoomPersistenceData[] | ValidationError {
   if (data == null || !Array.isArray(data)) {
     return validationError(data, path);
   }
@@ -102,7 +116,10 @@ function validateRooms(data: any, path: string[]): RoomPersistenceData[] | Valid
   return result;
 }
 
-function validateRoom(data: any, path: string[]): RoomPersistenceData | ValidationError {
+function validateRoom(
+  data: any,
+  path: string[],
+): RoomPersistenceData | ValidationError {
   if (data == null) {
     return validationError(data, path);
   }
@@ -117,11 +134,14 @@ function validateRoom(data: any, path: string[]): RoomPersistenceData | Validati
 
   return {
     id: data.id,
-    name: data.name
+    name: data.name,
   };
 }
 
-function validatePeers(data: any, path: string[]): PeerPersistenceData[] | undefined | ValidationError {
+function validatePeers(
+  data: any,
+  path: string[],
+): PeerPersistenceData[] | undefined | ValidationError {
   if (data == null) return undefined;
 
   if (!Array.isArray(data)) {
@@ -130,7 +150,7 @@ function validatePeers(data: any, path: string[]): PeerPersistenceData[] | undef
 
   const peers = [];
 
-  for (let [peer, i] of data.map((p, i) => [p, i])) {
+  for (const [peer, i] of data.map((p, i) => [p, i])) {
     const result = validatePeer(peer, [...path, i.toString()]);
 
     if (result === ValidationError) return result;
@@ -141,7 +161,10 @@ function validatePeers(data: any, path: string[]): PeerPersistenceData[] | undef
   return peers;
 }
 
-function validatePeer(data: any, path: string[]): PeerPersistenceData | ValidationError {
+function validatePeer(
+  data: any,
+  path: string[],
+): PeerPersistenceData | ValidationError {
   if (data == null) {
     return validationError(data, path);
   }
@@ -156,12 +179,12 @@ function validatePeer(data: any, path: string[]): PeerPersistenceData | Validati
 
   return {
     clientId: data.clientId,
-    volume: data.volume
+    volume: data.volume,
   };
 }
 
 function validationError(value: any, path: string[]): ValidationError {
-  console.error(`invalid value ${value} for ${ path.join('.')}.`);
+  console.error(`invalid value ${value} for ${path.join('.')}.`);
 
   return ValidationError;
 }

@@ -1,11 +1,14 @@
-import {app} from "electron";
-import fs from "fs";
-import path from "path";
-import {PersistenceData, validateData} from "../shared/data";
+import { app } from 'electron';
+import fs from 'node:fs';
+import path from 'node:path';
+import { type PersistenceData, validateData } from '../shared/data';
 
 const fileName = 'settings.json';
 
-export function save(input: any, afterValidate: (data: PersistenceData) => void) {
+export function save(
+  input: any,
+  afterValidate: (data: PersistenceData) => void,
+) {
   const data = validateData(input);
 
   if (data == null) return;
@@ -36,7 +39,7 @@ function getDataPath() {
 
   let dirPath;
 
-  app.getAppPath()
+  app.getAppPath();
 
   switch (process.platform) {
     case 'darwin':

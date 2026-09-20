@@ -8,18 +8,17 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
-import {app, BrowserWindow, shell, ipcMain, nativeTheme} from 'electron';
-import {autoUpdater} from 'electron-updater';
+import path from 'node:path';
+import { app, BrowserWindow, shell, ipcMain, nativeTheme } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import {resolveHtmlPath} from './util';
-import {load, save} from "./persistence";
+import { resolveHtmlPath } from './util';
+import { load, save } from './persistence';
 import dotenv from 'dotenv';
 
 class AppUpdater {
-  constructor() {
-  }
+  constructor() {}
 }
 
 let mainWindow: BrowserWindow | null = null;
@@ -39,7 +38,7 @@ ipcMain.on('load-data', async (event) => {
 });
 
 ipcMain.on('save-data', async (_, data) => {
-  save(data, data => {
+  save(data, (data) => {
     if (data.darkMode != null) {
       nativeTheme.themeSource = data.darkMode ? 'dark' : 'light';
     }
@@ -98,7 +97,7 @@ const createWindow = async () => {
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
@@ -124,7 +123,7 @@ const createWindow = async () => {
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
-    return {action: 'deny'};
+    return { action: 'deny' };
   });
 
   // Remove this if your app does not use auto updates
@@ -143,7 +142,7 @@ const checkForAutoUpdates = async () => {
 
   autoUpdater.on('download-progress', (progress) => {
     mainWindow?.webContents.send('update-progress', progress.percent);
-  })
+  });
 
   autoUpdater.on('update-downloaded', () => {
     autoUpdater.quitAndInstall(true, true);
@@ -154,11 +153,11 @@ const checkForAutoUpdates = async () => {
   });
 
   autoUpdater.checkForUpdates();
-}
+};
 
 const checkForManualUpdates = async () => {
   const response = await fetch(
-    'https://api.github.com/repos/grimmfl/open-up/releases/latest'
+    'https://api.github.com/repos/grimmfl/open-up/releases/latest',
   );
   const release = await response.json();
 
@@ -188,7 +187,7 @@ app
     const envPath = app.isPackaged
       ? path.join(process.resourcesPath, '.env')
       : path.join(__dirname, '../.env');
-    dotenv.config({path: envPath});
+    dotenv.config({ path: envPath });
 
     createWindow().then(() => {
       mainWindow?.webContents.on('did-finish-load', () => {
@@ -207,6 +206,5 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
-
   })
   .catch(console.log);

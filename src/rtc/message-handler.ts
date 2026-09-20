@@ -1,14 +1,12 @@
-import {RTCDataChannel} from "@roamhq/wrtc";
+import type { RTCDataChannel } from '@roamhq/wrtc';
 
 export interface PeerInformation {
   clientId: string;
   name: string;
 }
 
-
 export const RTCMessageType = ['text', 'image'] as const;
 export type RTCMessageType = (typeof RTCMessageType)[number];
-
 
 export interface RTCMessage {
   message: string;
@@ -19,8 +17,11 @@ export class RTCMessageHandler {
   private chatChannels = new Map<string, RTCDataChannel>();
   private informationChannels = new Map<string, RTCDataChannel>();
 
-  private chatEventListeners: ((peer: string, message: RTCMessage) => void)[] = [];
-  private informationEventListeners: ((information: PeerInformation) => void)[] = [];
+  private chatEventListeners: ((peer: string, message: RTCMessage) => void)[] =
+    [];
+  private informationEventListeners: ((
+    information: PeerInformation,
+  ) => void)[] = [];
 
   send(message: RTCMessage) {
     for (const channel of this.chatChannels.values()) {
@@ -31,8 +32,10 @@ export class RTCMessageHandler {
   }
 
   sendInformation(information: PeerInformation, peer: string | null = null) {
-    if (peer == null)  {
-      this.informationChannels.forEach(channel => this.sendInformationToChannel(information, channel));
+    if (peer == null) {
+      this.informationChannels.forEach((channel) =>
+        this.sendInformationToChannel(information, channel),
+      );
 
       return;
     }
@@ -45,8 +48,8 @@ export class RTCMessageHandler {
   addChatChannel(clientId: string, channel: RTCDataChannel) {
     this.chatChannels.set(clientId, channel);
 
-    this.chatEventListeners.forEach(callback => {
-      channel.addEventListener('message', event => {
+    this.chatEventListeners.forEach((callback) => {
+      channel.addEventListener('message', (event) => {
         callback(clientId, JSON.parse(event.data));
         console.log(`Received ${event.data}`);
       });
@@ -56,8 +59,10 @@ export class RTCMessageHandler {
   addInformationChannel(clientId: string, channel: RTCDataChannel) {
     this.informationChannels.set(clientId, channel);
 
-    this.informationEventListeners.forEach(callback => {
-      channel.addEventListener('message', event => callback(JSON.parse(event.data)));
+    this.informationEventListeners.forEach((callback) => {
+      channel.addEventListener('message', (event) =>
+        callback(JSON.parse(event.data)),
+      );
     });
   }
 
@@ -70,15 +75,21 @@ export class RTCMessageHandler {
     this.chatEventListeners.push(callback);
 
     this.chatChannels.forEach((channel, peer) => {
-      channel.addEventListener('message', event => callback(peer, JSON.parse(event.data)))
+      channel.addEventListener('message', (event) =>
+        callback(peer, JSON.parse(event.data)),
+      );
     });
   }
 
-  addInformationEventListener(callback: (information: PeerInformation) => void) {
+  addInformationEventListener(
+    callback: (information: PeerInformation) => void,
+  ) {
     this.informationEventListeners.push(callback);
 
-    this.informationChannels.forEach((channel, peer) => {
-      channel.addEventListener('message', event => callback(JSON.parse(event.data)));
+    this.informationChannels.forEach((channel) => {
+      channel.addEventListener('message', (event) =>
+        callback(JSON.parse(event.data)),
+      );
     });
   }
 
@@ -87,8 +98,10 @@ export class RTCMessageHandler {
     this.informationChannels.clear();
   }
 
-  private sendInformationToChannel(information: PeerInformation, channel: RTCDataChannel) {
+  private sendInformationToChannel(
+    information: PeerInformation,
+    channel: RTCDataChannel,
+  ) {
     channel.send(JSON.stringify(information));
   }
-
 }

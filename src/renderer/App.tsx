@@ -1,15 +1,14 @@
-import {MemoryRouter as Router, Routes, Route} from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import "bootstrap/dist/css/bootstrap.css";
-import {useState} from "react";
-import Sidebar, {SidebarValue} from "./sidebar";
-import Home from "./home/home";
-import Settings from "./settings/settings";
-import State from "./state";
-import ErrorDisplay from "./ErrorDisplay";
-import UpdateDisplay from "./update-display/update-display";
+import 'bootstrap/dist/css/bootstrap.css';
+import { useState } from 'react';
+import Sidebar, { type SidebarValue } from './sidebar';
+import Home from './home/home';
+import Settings from './settings/settings';
+import State from './state';
+import ErrorDisplay from './ErrorDisplay';
+import UpdateDisplay from './update-display/update-display';
 import Sizer from './sizer';
-
 
 function AppContent() {
   const [sidebarValue, setSidebarValue] = useState<SidebarValue>('home');
@@ -17,28 +16,27 @@ function AppContent() {
   function getWindow() {
     switch (sidebarValue) {
       case 'home':
-        return <Home/>;
+        return <Home />;
       case 'settings':
-        return <Settings/>;
+        return <Settings />;
     }
   }
 
   return (
     <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
-        <Sidebar onChange={setSidebarValue} initial={'home'}/>
-        <div className="flex-grow-1 p-4 p-md-5 vh-100 bg scrollable">
-          { getWindow() }
-        </div>
+      <Sidebar onChange={setSidebarValue} initial={'home'} />
+      <div className="flex-grow-1 p-4 p-md-5 vh-100 bg scrollable">
+        {getWindow()}
+      </div>
     </div>
-  )
+  );
 }
-
 
 function StateWrapper() {
   return (
     <State>
       <div className="d-flex flex-column bg">
-        <Sizer/>
+        <Sizer />
         <UpdateDisplay>
           <div className="d-flex flex-column flex-md-row w-100 vh-100 bg">
             <ErrorDisplay></ErrorDisplay>

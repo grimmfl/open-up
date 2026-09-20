@@ -1,11 +1,12 @@
-import {useContext} from "react";
-import {MessageContext, RoomContext, RTCContext} from "../../contexts";
-import PhoneOffIcon from "../../icons/phone-off-icon";
+import { useContext } from 'react';
+import { MessageContext, RoomContext, RTCContext } from '../../contexts';
+import PhoneOffIcon from '../../icons/phone-off-icon';
 
 export default function DisconnectButton() {
-  const {setRoomCodeInput, setRoomCode, setRoomId, roomId, setPeerNames} = useContext(RoomContext);
-  const {rtcConnectionManager, rtcMessageHandler} = useContext(RTCContext);
-  const {setMessageList} = useContext(MessageContext);
+  const { setRoomCodeInput, setRoomCode, setRoomId, roomId, setPeerNames } =
+    useContext(RoomContext);
+  const { rtcConnectionManager, rtcMessageHandler } = useContext(RTCContext);
+  const { setMessageList } = useContext(MessageContext);
 
   function disconnect() {
     setRoomCodeInput('');
@@ -17,15 +18,13 @@ export default function DisconnectButton() {
     setMessageList([]);
   }
 
-  return (
-    roomId != null
-      ?
-      <button className="btn btn-borderless p-2 text-danger" onClick={disconnect}>
-        <PhoneOffIcon/>
-      </button>
-      :
-      <button className="btn btn-borderless p-2" disabled>
-        <PhoneOffIcon/>
-      </button>
+  return roomId != null ? (
+    <button className="btn btn-borderless p-2 text-danger" onClick={disconnect}>
+      <PhoneOffIcon />
+    </button>
+  ) : (
+    <button className="btn btn-borderless p-2" disabled>
+      <PhoneOffIcon />
+    </button>
   );
 }

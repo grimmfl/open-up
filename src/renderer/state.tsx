@@ -1,22 +1,36 @@
-import {ReactElement, useEffect, useRef, useState} from "react";
+import { type ReactElement, useEffect, useRef, useState } from 'react';
 import {
-  AppContext, DeviceContext, MessageContext,
-  PeerSettingsContext, RoomContext, RTCContext, UserContext, UserInfoSettingsContext
-} from "./contexts";
-import {RTCConnectionManager, RTCEventType} from "../rtc/connection-manager";
-import AudioManager from "./audio-manager";
-import {Message} from "./home/message-view/message-card";
-import {PeerInformation, RTCMessageHandler} from "../rtc/message-handler";
-import {PeerPersistenceData, PersistenceData, RoomPersistenceData, validateData} from "../shared/data";
-
+  AppContext,
+  DeviceContext,
+  MessageContext,
+  PeerSettingsContext,
+  RoomContext,
+  RTCContext,
+  UserContext,
+  UserInfoSettingsContext,
+} from './contexts';
+import { RTCConnectionManager, RTCEventType } from '../rtc/connection-manager';
+import AudioManager from './audio-manager';
+import type { Message } from './home/message-view/message-card';
+import {
+  type PeerInformation,
+  RTCMessageHandler,
+} from '../rtc/message-handler';
+import {
+  type PeerPersistenceData,
+  type PersistenceData,
+  type RoomPersistenceData,
+  validateData,
+} from '../shared/data';
 
 function getDefaultDevice(devices: MediaDeviceInfo[], kind: MediaDeviceKind) {
-  const kindDevices = devices.filter(d => d.kind === kind);
+  const kindDevices = devices.filter((d) => d.kind === kind);
 
-  const candidate = kindDevices
-    .find(d => d.label.toLowerCase().includes('default'));
+  const candidate = kindDevices.find((d) =>
+    d.label.toLowerCase().includes('default'),
+  );
 
-  return candidate ?? kindDevices.length > 0 ? kindDevices[0].deviceId : null;
+  return (candidate ?? kindDevices.length > 0) ? kindDevices[0].deviceId : null;
 }
 
 export default function State({ children }: { children: ReactElement }) {
@@ -48,7 +62,9 @@ export default function State({ children }: { children: ReactElement }) {
   const [persistedRooms, setPersistedRooms] = useState(
     new Map<string, RoomPersistenceData>(),
   );
-  const [peersTalking, setPeersTalking] = useState<Set<string>>(new Set<string>());
+  const [peersTalking, setPeersTalking] = useState<Set<string>>(
+    new Set<string>(),
+  );
 
   // ---------------------- UserContext ----------------------
   const [userName, setUserName] = useState<string>('');
@@ -63,7 +79,9 @@ export default function State({ children }: { children: ReactElement }) {
   const [windowSize, setWindowSize] = useState<string>('lg');
 
   // ---------------------- PeerSettingsContext ----------------------
-  const [peers, setPeers] = useState<Map<string, PeerPersistenceData>>(new Map<string, PeerPersistenceData>());
+  const [peers, setPeers] = useState<Map<string, PeerPersistenceData>>(
+    new Map<string, PeerPersistenceData>(),
+  );
 
   const informationRef = useRef({
     name: userName,
@@ -166,7 +184,7 @@ export default function State({ children }: { children: ReactElement }) {
 
     window.electron.ipcRenderer.sendMessage('load-data');
 
-    window.electron.ipcRenderer.on('version', version => {
+    window.electron.ipcRenderer.on('version', (version) => {
       setVersion(version as string);
     });
   }, []);
@@ -187,7 +205,7 @@ export default function State({ children }: { children: ReactElement }) {
     const data: PersistenceData = {
       user: {
         name: userName,
-        clientId: clientId ?? undefined
+        clientId: clientId ?? undefined,
       },
       devices: {
         inputDeviceId: audioInputDeviceId,
@@ -206,7 +224,7 @@ export default function State({ children }: { children: ReactElement }) {
     audioOutputDeviceId,
     persistedRooms,
     darkMode,
-    peers
+    peers,
   ]);
 
   useEffect(() => {
@@ -215,7 +233,7 @@ export default function State({ children }: { children: ReactElement }) {
 
       peers.set(id, {
         clientId: id,
-        volume: 100
+        volume: 100,
       });
     }
   }, [peerNames]);
@@ -262,7 +280,7 @@ export default function State({ children }: { children: ReactElement }) {
               persistedRooms,
               setPersistedRooms,
               peersTalking,
-              setPeersTalking
+              setPeersTalking,
             }}
           >
             <UserContext
@@ -281,8 +299,10 @@ export default function State({ children }: { children: ReactElement }) {
                   setDarkMode,
                 }}
               >
-                <AppContext value={{version, setVersion, windowSize, setWindowSize}}>
-                  <PeerSettingsContext value={{peers, setPeers}}>
+                <AppContext
+                  value={{ version, setVersion, windowSize, setWindowSize }}
+                >
+                  <PeerSettingsContext value={{ peers, setPeers }}>
                     <AudioManager>{children}</AudioManager>
                   </PeerSettingsContext>
                 </AppContext>

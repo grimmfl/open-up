@@ -2,8 +2,8 @@ import {
   app,
   Menu,
   shell,
-  BrowserWindow,
-  MenuItemConstructorOptions,
+  type BrowserWindow,
+  type MenuItemConstructorOptions,
 } from 'electron';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
@@ -193,7 +193,7 @@ export default class MenuBuilder {
   }
 
   buildDefaultTemplate() {
-    const templateDefault = [
+    return [
       {
         label: '&File',
         submenu: [
@@ -284,7 +284,5 @@ export default class MenuBuilder {
         ],
       },
     ];
-
-    return templateDefault;
   }
 }

@@ -1,17 +1,12 @@
-import SettingsIcon from "./icons/settings-icon";
-import HomeIcon from "./icons/home-icon";
-import {
-  ReactElement,
-  ReactNode,
-  useContext,
-  useState,
-} from 'react';
+import SettingsIcon from './icons/settings-icon';
+import HomeIcon from './icons/home-icon';
+import { type ReactElement, type ReactNode, useContext, useState } from 'react';
 import ArrowLeftIcon from './icons/arrow-left-icon';
 import { AppContext, UserContext } from './contexts';
 import ArrowUpIcon from './icons/arrow-up-icon';
 
 const SidebarValue = ['home', 'settings'] as const;
-export type SidebarValue = typeof SidebarValue[number];
+export type SidebarValue = (typeof SidebarValue)[number];
 
 interface SidebarItem {
   value: SidebarValue;
@@ -19,20 +14,17 @@ interface SidebarItem {
   additionalContent?: ReactNode;
 }
 
-export default function Sidebar(
-  {
-    onChange = () => {},
-    initial = 'home'
-  }:
-  {
-    onChange?: (value: SidebarValue) => void,
-    initial?: SidebarValue,
-  }
-) {
+export default function Sidebar({
+  onChange = () => {},
+  initial = 'home',
+}: {
+  onChange?: (value: SidebarValue) => void;
+  initial?: SidebarValue;
+}) {
   const [value, setValue] = useState<SidebarValue>(initial);
   const [wasOnSettings, setWasOnSettings] = useState<boolean>(false);
-  const {userName} = useContext(UserContext);
-  const { windowSize} = useContext(AppContext);
+  const { userName } = useContext(UserContext);
+  const { windowSize } = useContext(AppContext);
 
   const SidebarItems: SidebarItem[] = [
     {
@@ -41,15 +33,25 @@ export default function Sidebar(
     },
     {
       value: 'settings',
-      content: <div className="position-relative ignore-blur"><SettingsIcon /></div>,
-      additionalContent: (
-          showSettingsDialog() && <div className="tooltip-dialog p-3 d-flex flex-row" style={{ left: 45, top: 40 }}>
-            { windowSize === 'xs' || windowSize === 'sm' ? <ArrowUpIcon/> : <ArrowLeftIcon/> }
-            <span className="mx-2">
-              Have a look at the settings to set your username and audio
-              devices.
-            </span>
-          </div>
+      content: (
+        <div className="position-relative ignore-blur">
+          <SettingsIcon />
+        </div>
+      ),
+      additionalContent: showSettingsDialog() && (
+        <div
+          className="tooltip-dialog p-3 d-flex flex-row"
+          style={{ left: 45, top: 40 }}
+        >
+          {windowSize === 'xs' || windowSize === 'sm' ? (
+            <ArrowUpIcon />
+          ) : (
+            <ArrowLeftIcon />
+          )}
+          <span className="mx-2">
+            Have a look at the settings to set your username and audio devices.
+          </span>
+        </div>
       ),
     },
   ];
@@ -63,7 +65,9 @@ export default function Sidebar(
   }
 
   function isGuid() {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userName);
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      userName,
+    );
   }
 
   function showSettingsDialog() {
@@ -72,7 +76,7 @@ export default function Sidebar(
 
   return (
     <div>
-      { showSettingsDialog() && <div className="blur"></div> }
+      {showSettingsDialog() && <div className="blur"></div>}
       <div className="bg-darker d-flex flex-row flex-md-column h-md-100 justify-content-start">
         {SidebarItems.map((i, index) => (
           <div key={`sidebarItem${index}`}>

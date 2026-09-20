@@ -1,12 +1,12 @@
-import MessageCard from "./message-card";
-import MessageInput from "./message-input";
-import {useContext, useEffect, useRef, useState} from "react";
-import {MessageContext, RoomContext} from "../../contexts";
-import NewMessageTooltip from "./new-message-tooltip";
+import MessageCard from './message-card';
+import MessageInput from './message-input';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { MessageContext, RoomContext } from '../../contexts';
+import NewMessageTooltip from './new-message-tooltip';
 
 export default function MessageView() {
-  const {messageList} = useContext(MessageContext);
-  const {roomId} = useContext(RoomContext);
+  const { messageList } = useContext(MessageContext);
+  const { roomId } = useContext(RoomContext);
 
   const [showNewMessageTooltip, setShowNewMessageTooltip] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
@@ -29,7 +29,7 @@ export default function MessageView() {
   }, []);
 
   useEffect(() => {
-    scrollDown('instant')
+    scrollDown('instant');
   }, []);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function MessageView() {
       return;
     }
 
-    if (messageList.slice(previousMessageCount).find(m => !m.fromMe)) {
+    if (messageList.slice(previousMessageCount).find((m) => !m.fromMe)) {
       setShowNewMessageTooltip(true);
     }
 
@@ -68,24 +68,30 @@ export default function MessageView() {
 
     if (div == null) return;
 
-    setScrollOffset(Math.abs(div.scrollHeight - div.scrollTop - div.clientHeight));
+    setScrollOffset(
+      Math.abs(div.scrollHeight - div.scrollTop - div.clientHeight),
+    );
 
     setShowNewMessageTooltip(false);
   }
 
-  const divClass = `${roomId != null ? 'd-flex' : 'd-none d-md-flex'} flex-grow-1 flex-column justify-content-between bg-darker border-rounded h-100 flex-1 min-h0`
+  const divClass = `${roomId != null ? 'd-flex' : 'd-none d-md-flex'} flex-grow-1 flex-column justify-content-between bg-darker border-rounded h-100 flex-1 min-h0`;
 
   return (
     <div className={divClass}>
       <div className="d-flex flex-column justify-content-start min-h0 position-relative">
-        <div className="d-flex flex-column justify-content-start overflow-auto mb-2" ref={divRef} onScroll={onScroll}>
-          {messageList.map((message, index) =>
-            <MessageCard key={`message${index}`} message={message}/>
-          )}
+        <div
+          className="d-flex flex-column justify-content-start overflow-auto mb-2"
+          ref={divRef}
+          onScroll={onScroll}
+        >
+          {messageList.map((message, index) => (
+            <MessageCard key={`message${index}`} message={message} />
+          ))}
         </div>
-        { showNewMessageTooltip && <NewMessageTooltip/> }
+        {showNewMessageTooltip && <NewMessageTooltip />}
       </div>
-      <MessageInput/>
+      <MessageInput />
     </div>
-  )
+  );
 }

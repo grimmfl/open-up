@@ -1,11 +1,14 @@
 import { useContext, useState } from 'react';
-import {MessageContext, RTCContext} from "../../contexts";
+import { MessageContext, RTCContext } from '../../contexts';
 
 export default function MessageInput() {
-  const {rtcMessageHandler} = useContext(RTCContext);
-  const {setMessageList, messageInput, setMessageInput} = useContext(MessageContext);
+  const { rtcMessageHandler } = useContext(RTCContext);
+  const { setMessageList, messageInput, setMessageInput } =
+    useContext(MessageContext);
 
-  const [isInputDisabled, setIsInputDisabled] = useState<boolean>(!messageInput.trim());
+  const [isInputDisabled, setIsInputDisabled] = useState<boolean>(
+    !messageInput.trim(),
+  );
   const [isControlDown, setIsControlDown] = useState<boolean>(false);
   const [images, setImages] = useState<string[]>([]);
 
@@ -34,9 +37,9 @@ export default function MessageInput() {
 
         const reader = new FileReader();
         reader.readAsDataURL(blob);
-        reader.onloadend = function () {
+        reader.onloadend = () => {
           const base64data = reader.result as string;
-          setImages(prev => [...prev, base64data])
+          setImages((prev) => [...prev, base64data]);
         };
       }
     });
@@ -59,14 +62,14 @@ export default function MessageInput() {
 
   function sendImages() {
     for (const image of images) {
-      rtcMessageHandler!.send({ message: image, type: 'image'});
-      setMessageList(prev => [
+      rtcMessageHandler!.send({ message: image, type: 'image' });
+      setMessageList((prev) => [
         ...prev,
         {
           message: image,
           sender: '',
           fromMe: true,
-          type: 'image'
+          type: 'image',
         },
       ]);
     }
@@ -75,7 +78,11 @@ export default function MessageInput() {
   }
 
   function sendMessage() {
-    if (rtcMessageHandler == null || (!messageInput.trim() && images.length === 0)) return;
+    if (
+      rtcMessageHandler == null ||
+      (!messageInput.trim() && images.length === 0)
+    )
+      return;
 
     sendImages();
 
@@ -85,12 +92,15 @@ export default function MessageInput() {
 
     rtcMessageHandler.send({ message, type: 'text' });
 
-    setMessageList(prev => [...prev, {
-      message,
-      sender: '',
-      fromMe: true,
-      type: 'text'
-    }]);
+    setMessageList((prev) => [
+      ...prev,
+      {
+        message,
+        sender: '',
+        fromMe: true,
+        type: 'text',
+      },
+    ]);
 
     setMessageInput('');
     setIsInputDisabled(true);
@@ -98,13 +108,19 @@ export default function MessageInput() {
 
   return (
     <div className="d-flex flex-column align-self-center align-content-center w-95 mb-4">
-      { images.length > 0 &&
+      {images.length > 0 && (
         <div className="d-flex flex-row p-2 mb-2 bg border-rounded flex-wrap">
-        {images.map((image, i) => (
-          <img key={`input-image${i}`} src={image} alt="" width="80px" className="m-1 border-rounded"/>
-        ))}
-      </div>
-      }
+          {images.map((image, i) => (
+            <img
+              key={`input-image${i}`}
+              src={image}
+              alt=""
+              width="80px"
+              className="m-1 border-rounded"
+            />
+          ))}
+        </div>
+      )}
       <div className="d-flex flex-row w-100">
         <input
           className="form-control message-input py-2 flex-grow-1 align-self-center"

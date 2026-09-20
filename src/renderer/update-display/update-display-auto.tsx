@@ -1,7 +1,10 @@
-import {GITHUB_REPO} from "../../shared/static";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from 'react';
 
-export default function UpdateDisplayAuto({ onUpdate }: { onUpdate: () => void}) {
+export default function UpdateDisplayAuto({
+  onUpdate,
+}: {
+  onUpdate: () => void;
+}) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -12,9 +15,19 @@ export default function UpdateDisplayAuto({ onUpdate }: { onUpdate: () => void})
 
   return (
     <div className="text-center">
-      Downloading Update<br/>
-      <div className="progress mt-3" role="progressbar" aria-valuenow={0} aria-valuemin={0} aria-valuemax={100}>
-        <div className="progress-bar bg-primaryy" style={ {width: `${progress}%`}}></div>
+      Downloading Update
+      <br />
+      <div
+        className="progress mt-3"
+        role="progressbar"
+        aria-valuenow={0}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className="progress-bar bg-primaryy"
+          style={{ width: `${progress}%` }}
+        ></div>
       </div>
     </div>
   );

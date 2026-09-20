@@ -1,8 +1,8 @@
-import {useContext, useRef, useState} from "react";
-import {RoomContext} from "../../contexts";
+import { useContext, useRef, useState } from 'react';
+import { RoomContext } from '../../contexts';
 
 export default function CopyRoomButton() {
-  const {roomCode} = useContext(RoomContext);
+  const { roomCode } = useContext(RoomContext);
 
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -18,14 +18,21 @@ export default function CopyRoomButton() {
 
   return (
     <div>
-      <button className="btn btn-disabled mt-4 mb-2 w-100" onClick={copyRoomCode}>{roomCode}</button>
-      {
-        showTooltip && (
-          <div ref={tooltipRef} className="position-fixed bg-darker border-rounded py-2 px-6">
-            Copied!
-          </div>
-        )
-      }
+      <button
+        type="button"
+        className="btn btn-disabled mt-4 mb-2 w-100"
+        onClick={copyRoomCode}
+      >
+        {roomCode}
+      </button>
+      {showTooltip && (
+        <div
+          ref={tooltipRef}
+          className="position-fixed bg-darker border-rounded py-2 px-6"
+        >
+          Copied!
+        </div>
+      )}
     </div>
   );
 }

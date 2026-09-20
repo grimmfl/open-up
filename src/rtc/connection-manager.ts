@@ -1,21 +1,29 @@
-import {RTCDataChannel, RTCPeerConnection, RTCRtpSender, RTCSessionDescription} from "@roamhq/wrtc";
-import {SignalingClient} from "./signaling/client/main";
+import {
+  type RTCDataChannel,
+  RTCPeerConnection,
+  type RTCRtpSender,
+  RTCSessionDescription,
+} from '@roamhq/wrtc';
+import { SignalingClient } from './signaling/client/main';
 import {
   SignalingAnswer,
-  SignalingClientId,
+  type SignalingClientId,
   SignalingCreateRoom,
-  SignalingError,
-  SignalingIceCandidate, SignalingJoinOrCreateRoom,
-  SignalingJoinRoom, SignalingLeaveRoom,
+  type SignalingError,
+  SignalingIceCandidate,
+  SignalingJoinOrCreateRoom,
+  SignalingJoinRoom,
+  SignalingLeaveRoom,
   SignalingMessage,
   SignalingMessageType,
   SignalingOffer,
-  SignalingPeerList, SignalingRequestClientId
-} from "./signaling/messages";
+  type SignalingPeerList,
+  SignalingRequestClientId,
+} from './signaling/messages';
 
-
-const RTCConfiguration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-
+const RTCConfiguration = {
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+};
 
 export enum RTCEventType {
   ClientId,
@@ -24,7 +32,7 @@ export enum RTCEventType {
   ChatChannel,
   InformationChannel,
   RemoteStream,
-  Message
+  Message,
 }
 
 export interface RTCEventConfig {
@@ -51,26 +59,47 @@ export class RTCConnectionManager {
 
   private _audioInput: MediaStream | null = null;
 
-  private clientIdEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>();
-  private connectedEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>()
-  private disconnectedEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>();
-  private chatChannelEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>();
-  private informationChannelEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>();
-  private remoteStreamEventListeners = new Map<string, ((event: RTCEvent, callbackId: string) => void)>();
-  private messageEventListeners = new Map<SignalingMessageType | null, Map<string, ((event: RTCEvent, callbackId: string) => void)>>();
+  private clientIdEventListeners = new Map<
+    string,
+    (event: RTCEvent, callbackId: string) => void
+  >();
+  private connectedEventListeners = new Map<
+    string,
+    (event: RTCEvent, callbackId: string) => void
+  >();
+  private disconnectedEventListeners = new Map<
+    string,
+    (event: RTCEvent, callbackId: string) => void
+  >();
+  private chatChannelEventListeners = new Map<
+    string,
+    (event: RTCEvent, callbackId: string) => void
+  >();
+  private informationChannelEventListeners = new Map<
+    string,
+    (event: RTCEvent, callbackId: string) => void
+  >();
+  private remoteStreamEventListeners = new Map<
+    string,
+    (event: RTCEvent, callbackId: string) => void
+  >();
+  private messageEventListeners = new Map<
+    SignalingMessageType | null,
+    Map<string, (event: RTCEvent, callbackId: string) => void>
+  >();
 
   private client;
 
   constructor(url: string, clientId: string | null) {
     this.client = new SignalingClient(url);
 
-    this.client.onMessage(async event => {
+    this.client.onMessage(async (event) => {
       await this.handleMessageEvent(event);
     });
 
     this.client.onOpen(async () => {
       console.log('Signaling connection opened.');
-      this.client.send(new SignalingRequestClientId('', '', clientId))
+      this.client.send(new SignalingRequestClientId('', '', clientId));
     });
   }
 
@@ -101,29 +130,50 @@ export class RTCConnectionManager {
     this.client.send(new SignalingJoinOrCreateRoom(this.clientId, roomId));
   }
 
-  addEventListener(event: RTCEventType, callback: (event: RTCEvent, callbackId: string) => void, config: RTCEventConfig = {}) {
+  addEventListener(
+    event: RTCEventType,
+    callback: (event: RTCEvent, callbackId: string) => void,
+    config: RTCEventConfig = {},
+  ) {
     const id = crypto.randomUUID().toString();
 
-    this.alterEventListener(event, listener => listener.set(id, callback), config);
+    this.alterEventListener(
+      event,
+      (listener) => listener.set(id, callback),
+      config,
+    );
   }
 
-  removeEventListener(event: RTCEventType, callbackId: string, config: RTCEventConfig = {}) {
-    this.alterEventListener(event, listener => listener.delete(callbackId), config);
+  removeEventListener(
+    event: RTCEventType,
+    callbackId: string,
+    config: RTCEventConfig = {},
+  ) {
+    this.alterEventListener(
+      event,
+      (listener) => listener.delete(callbackId),
+      config,
+    );
   }
 
   leaveRoom() {
-    if (this.clientId != null) this.client.send(new SignalingLeaveRoom(this.clientId));
+    if (this.clientId != null)
+      this.client.send(new SignalingLeaveRoom(this.clientId));
 
-    this.peerConnections.forEach(conn => conn.close());
+    this.peerConnections.forEach((conn) => conn.close());
     this.peerConnections.clear();
     this.connections.clear();
-    this.chatChannels.forEach(channel => channel.close());
+    this.chatChannels.forEach((channel) => channel.close());
     this.chatChannels.clear();
-    this.informationChannels.forEach(channel => channel.close());
+    this.informationChannels.forEach((channel) => channel.close());
     this.informationChannels.clear();
   }
 
-  private alterEventListener(event: RTCEventType, alterFn: (listeners: Map<string, any>) => void, config: RTCEventConfig = {}) {
+  private alterEventListener(
+    event: RTCEventType,
+    alterFn: (listeners: Map<string, any>) => void,
+    config: RTCEventConfig = {},
+  ) {
     switch (event) {
       case RTCEventType.ClientId:
         alterFn(this.clientIdEventListeners);
@@ -143,15 +193,18 @@ export class RTCConnectionManager {
       case RTCEventType.RemoteStream:
         alterFn(this.remoteStreamEventListeners);
         return;
-      case RTCEventType.Message:
+      case RTCEventType.Message: {
         const type = config.messageType ?? null;
 
-        const callbacks = this.messageEventListeners.get(type) ?? new Map<string, (message: RTCEvent, callbackId: string) => void>();
+        const callbacks =
+          this.messageEventListeners.get(type) ??
+          new Map<string, (message: RTCEvent, callbackId: string) => void>();
 
         alterFn(callbacks);
 
         this.messageEventListeners.set(type, callbacks);
         return;
+      }
     }
   }
 
@@ -162,15 +215,15 @@ export class RTCConnectionManager {
       const oldTracks = this.tracks.get(peer);
 
       if (oldTracks != null) {
-        oldTracks.forEach(track => conn.removeTrack(track));
+        oldTracks.forEach((track) => conn.removeTrack(track));
       }
 
       this.addInputStream(peer, conn, stream);
-    })
+    });
   }
 
   setMuted(isMuted: boolean) {
-    this._audioInput?.getAudioTracks()?.forEach(t => t.enabled = !isMuted);
+    this._audioInput?.getAudioTracks()?.forEach((t) => (t.enabled = !isMuted));
   }
 
   private async handleMessageEvent(event: MessageEvent) {
@@ -217,8 +270,13 @@ export class RTCConnectionManager {
     }
   }
 
-  private callOnMessage(message: SignalingMessage, type: SignalingMessageType | null) {
-    const callbacks = this.messageEventListeners.get(type) ?? new Map<string, (message: RTCEvent, callbackId: string) => void>();
+  private callOnMessage(
+    message: SignalingMessage,
+    type: SignalingMessageType | null,
+  ) {
+    const callbacks =
+      this.messageEventListeners.get(type) ??
+      new Map<string, (message: RTCEvent, callbackId: string) => void>();
 
     const event = { message };
     callbacks.forEach((callback, id) => callback(event, id));
@@ -228,7 +286,7 @@ export class RTCConnectionManager {
     this.clientId = message.id;
 
     const event = {
-      clientId: this.clientId!
+      clientId: this.clientId!,
     };
 
     this.clientIdEventListeners.forEach((callback, id) => callback(event, id));
@@ -249,7 +307,7 @@ export class RTCConnectionManager {
       this.removePeer(peer);
     }
 
-    this.peerList = message.peerList.filter(p => p !== this.clientId);
+    this.peerList = message.peerList.filter((p) => p !== this.clientId);
 
     for (const peer of message.peerList) {
       if (peer == this.clientId) return;
@@ -277,7 +335,9 @@ export class RTCConnectionManager {
     this.chatChannels.delete(peer);
 
     const event = { peer };
-    this.disconnectedEventListeners.forEach((callback, id) => callback(event, id));
+    this.disconnectedEventListeners.forEach((callback, id) =>
+      callback(event, id),
+    );
   }
 
   private async setupPeerConnection(peer: string, isInitiator: boolean) {
@@ -302,10 +362,13 @@ export class RTCConnectionManager {
     await this.listenForConnected(peer, peerConnection);
 
     if (isInitiator) {
-      this.setupDataChannel(peer, peerConnection.createDataChannel('information'));
+      this.setupDataChannel(
+        peer,
+        peerConnection.createDataChannel('information'),
+      );
       this.setupDataChannel(peer, peerConnection.createDataChannel('chat'));
     } else {
-      peerConnection.addEventListener('datachannel', async event => {
+      peerConnection.addEventListener('datachannel', async (event) => {
         console.log('Data channel received:', event.channel.label);
         this.setupDataChannel(peer, event.channel);
       });
@@ -314,18 +377,30 @@ export class RTCConnectionManager {
     return peerConnection;
   }
 
-  private addInputStream(peer: string, conn: RTCPeerConnection, stream: MediaStream) {
-    this.tracks.set(peer, stream.getAudioTracks().map(t => conn.addTrack(t, stream)));
+  private addInputStream(
+    peer: string,
+    conn: RTCPeerConnection,
+    stream: MediaStream,
+  ) {
+    this.tracks.set(
+      peer,
+      stream.getAudioTracks().map((t) => conn.addTrack(t, stream)),
+    );
   }
 
-  private async listenForTrack(peer: string, peerConnection: RTCPeerConnection) {
-    peerConnection.addEventListener('track', event => {
+  private async listenForTrack(
+    peer: string,
+    peerConnection: RTCPeerConnection,
+  ) {
+    peerConnection.addEventListener('track', (event) => {
       const [remoteStream] = event.streams;
 
       const rtcEvent = { peer, remoteStream };
 
-      this.remoteStreamEventListeners.forEach((callback, id) => callback(rtcEvent, id));
-    })
+      this.remoteStreamEventListeners.forEach((callback, id) =>
+        callback(rtcEvent, id),
+      );
+    });
   }
 
   private setupDataChannel(peer: string, dataChannel: RTCDataChannel) {
@@ -335,7 +410,9 @@ export class RTCConnectionManager {
       this.chatChannels.set(peer, dataChannel);
 
       dataChannel.addEventListener('open', () => {
-        this.chatChannelEventListeners.forEach((callback, id) => callback(event, id));
+        this.chatChannelEventListeners.forEach((callback, id) =>
+          callback(event, id),
+        );
       });
 
       return;
@@ -345,36 +422,53 @@ export class RTCConnectionManager {
       this.informationChannels.set(peer, dataChannel);
 
       dataChannel.addEventListener('open', () => {
-        this.informationChannelEventListeners.forEach((callback, id) => callback(event, id));
+        this.informationChannelEventListeners.forEach((callback, id) =>
+          callback(event, id),
+        );
       });
 
       return;
     }
   }
 
-  private async listenForConnected(peer: string, peerConnection: RTCPeerConnection) {
+  private async listenForConnected(
+    peer: string,
+    peerConnection: RTCPeerConnection,
+  ) {
     if (this.clientId == null) {
       console.error('Client ID is null.');
       return;
     }
 
     peerConnection.addEventListener('connectionstatechange', () => {
-      if (peerConnection.connectionState === 'connected' && !this.connections.get(peer)) {
+      if (
+        peerConnection.connectionState === 'connected' &&
+        !this.connections.get(peer)
+      ) {
         this.connections.set(peer, true);
 
         const event = { peer };
 
-        this.connectedEventListeners.forEach((callback, id) => callback(event, id));
+        this.connectedEventListeners.forEach((callback, id) =>
+          callback(event, id),
+        );
 
         console.log(`RTC to ${peer} connected.`);
       }
     });
   }
 
-  private async listenForIceCandidate(peer: string, peerConnection: RTCPeerConnection) {
-    peerConnection.addEventListener('icecandidate', async event => {
+  private async listenForIceCandidate(
+    peer: string,
+    peerConnection: RTCPeerConnection,
+  ) {
+    peerConnection.addEventListener('icecandidate', async (event) => {
       if (event.candidate) {
-        const message = new SignalingIceCandidate(peer, this.clientId!, event.candidate);
+        const message = new SignalingIceCandidate(
+          peer,
+          this.clientId!,
+          event.candidate,
+        );
 
         this.client.send(message);
       }
@@ -431,7 +525,9 @@ export class RTCConnectionManager {
     const peerConnection = this.peerConnections.get(peer);
 
     if (peerConnection == null) {
-      console.error(`Answer from ${peer} received, but no peer connection exists.`);
+      console.error(
+        `Answer from ${peer} received, but no peer connection exists.`,
+      );
       return;
     }
 
@@ -453,7 +549,9 @@ export class RTCConnectionManager {
     const peerConnection = this.peerConnections.get(peer);
 
     if (peerConnection == null) {
-      console.error(`ICE Candidate from ${peer} received, but no peer connection exists.`);
+      console.error(
+        `ICE Candidate from ${peer} received, but no peer connection exists.`,
+      );
       return;
     }
 
@@ -461,6 +559,6 @@ export class RTCConnectionManager {
   }
 
   private async handleError(message: SignalingError) {
-    console.error(`Signaling error: ${message.message}`)
+    console.error(`Signaling error: ${message.message}`);
   }
 }

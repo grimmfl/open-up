@@ -11,9 +11,9 @@
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "build:server": "tsc src/rtc/signaling/server/main.ts",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && npm run build:dll",
-    "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "prettier": "prettier",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never && npm run build:dll",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "prestart": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.main.dev.ts",
@@ -60,6 +60,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.14",
     "@electron/rebuild": "^0.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
     "@roamhq/wrtc": "^0.9.1",
@@ -87,7 +88,6 @@
     "html-webpack-plugin": "^5.6.3",
     "identity-obj-proxy": "^3.0.0",
     "mini-css-extract-plugin": "^2.9.2",
-    "prettier": "^3.9.8",
     "react-refresh": "^0.16.0",
     "react-test-renderer": "^19.0.0",
     "rimraf": "^6.0.1",

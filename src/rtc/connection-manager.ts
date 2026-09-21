@@ -168,6 +168,7 @@ export class RTCConnectionManager {
     this.chatChannels.clear();
     this.informationChannels.forEach((channel) => channel.close());
     this.informationChannels.clear();
+    this.pendingIceCandidates.clear();
   }
 
   private alterEventListener(
@@ -443,7 +444,6 @@ export class RTCConnectionManager {
     }
 
     peerConnection.addEventListener('connectionstatechange', () => {
-      console.log('state', peerConnection.connectionState);
       if (
         peerConnection.connectionState === 'connected' &&
         !this.connections.get(peer)
@@ -493,9 +493,11 @@ export class RTCConnectionManager {
 
     if (peerConnection == null) return;
 
-    peerConnection.setRemoteDescription(message.offer);
+    await peerConnection.setRemoteDescription(message.offer);
 
     console.log(`Offer by ${peer} received.`);
+
+    await this.flushPendingIceCandidates(peer, peerConnection);
 
     await this.sendAnswer(peer, peerConnection);
   }
@@ -539,6 +541,23 @@ export class RTCConnectionManager {
     await peerConnection.setRemoteDescription(remoteDescription);
 
     console.log(`Answer from ${peer} received.`);
+
+    await this.flushPendingIceCandidates(peer, peerConnection);
+  }
+
+  private async flushPendingIceCandidates(
+    peer: string,
+    peerConnection: RTCPeerConnection,
+  ) {
+    const pending = this.pendingIceCandidates.get(peer);
+
+    if (pending == null) return;
+
+    this.pendingIceCandidates.delete(peer);
+
+    for (const candidate of pending) {
+      await peerConnection.addIceCandidate(candidate);
+    }
   }
 
   private async handleIceCandidate(message: SignalingIceCandidate) {
@@ -555,6 +574,13 @@ export class RTCConnectionManager {
       console.error(
         `ICE Candidate from ${peer} received, but no peer connection exists.`,
       );
+      return;
+    }
+
+    if (peerConnection.remoteDescription == null) {
+      const pending = this.pendingIceCandidates.get(peer) ?? [];
+      pending.push(message.candidate);
+      this.pendingIceCandidates.set(peer, pending);
       return;
     }
 

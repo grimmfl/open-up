@@ -58,8 +58,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GH_TOKEN }}
-          file: release/build/OpenUp.dmg
-          asset_name: OpenUp.dmg
+          file: release/build/*.dmg
           tag: ${{ github.ref }}
           overwrite: true
           body: ""

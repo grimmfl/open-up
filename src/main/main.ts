@@ -46,6 +46,10 @@ function saveData(data: any) {
 ipcMain.on('load-data', async (event) => {
   const data = load();
 
+  if (process.env.CLIENT_ID != null && data != null) {
+    data.user.clientId = process.env.CLIENT_ID;
+  }
+
   nativeTheme.themeSource =
     (data?.darkMode ?? nativeTheme.shouldUseDarkColors) ? 'dark' : 'light';
 

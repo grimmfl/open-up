@@ -22,28 +22,7 @@ import {
 } from './signaling/messages';
 
 const RTCConfiguration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    // TODO: temporary public test TURN server (openrelay.metered.ca) to
-    // confirm NAT traversal is the issue. Replace with a real TURN
-    // deployment before shipping - this one is shared/rate-limited/best-effort.
-    { urls: 'stun:openrelay.metered.ca:80' },
-    {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-  ],
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 };
 
 export enum RTCEventType {
@@ -77,6 +56,7 @@ export class RTCConnectionManager {
   private chatChannels = new Map<string, RTCDataChannel>();
   private informationChannels = new Map<string, RTCDataChannel>();
   private tracks = new Map<string, RTCRtpSender[]>();
+  private pendingIceCandidates = new Map<string, RTCIceCandidate[]>();
 
   private _audioInput: MediaStream | null = null;
 
@@ -354,6 +334,7 @@ export class RTCConnectionManager {
     this.connections.delete(peer);
     this.informationChannels.delete(peer);
     this.chatChannels.delete(peer);
+    this.pendingIceCandidates.delete(peer);
 
     const event = { peer };
     this.disconnectedEventListeners.forEach((callback, id) =>
@@ -462,8 +443,7 @@ export class RTCConnectionManager {
     }
 
     peerConnection.addEventListener('connectionstatechange', () => {
-      console.log(`[${peer}] connectionState:`, peerConnection.connectionState);
-
+      console.log('state', peerConnection.connectionState);
       if (
         peerConnection.connectionState === 'connected' &&
         !this.connections.get(peer)
@@ -478,51 +458,6 @@ export class RTCConnectionManager {
 
         console.log(`RTC to ${peer} connected.`);
       }
-
-      if (
-        peerConnection.connectionState === 'failed' ||
-        peerConnection.connectionState === 'disconnected'
-      ) {
-        peerConnection.getStats().then((stats) => {
-          stats.forEach((report) => {
-            if (
-              report.type === 'candidate-pair' ||
-              report.type === 'local-candidate' ||
-              report.type === 'remote-candidate'
-            ) {
-              console.log(`[${peer}] stat ${report.type}:`, report);
-            }
-          });
-        });
-      }
-    });
-
-    peerConnection.addEventListener('iceconnectionstatechange', () => {
-      console.log(
-        `[${peer}] iceConnectionState:`,
-        peerConnection.iceConnectionState,
-      );
-    });
-
-    peerConnection.addEventListener('icegatheringstatechange', () => {
-      console.log(
-        `[${peer}] iceGatheringState:`,
-        peerConnection.iceGatheringState,
-      );
-    });
-
-    peerConnection.addEventListener('icecandidateerror', (event: any) => {
-      console.error(`[${peer}] icecandidateerror:`, {
-        errorCode: event.errorCode,
-        errorText: event.errorText,
-        url: event.url,
-        address: event.address,
-        port: event.port,
-      });
-    });
-
-    peerConnection.addEventListener('signalingstatechange', () => {
-      console.log(`[${peer}] signalingState:`, peerConnection.signalingState);
     });
   }
 
@@ -531,11 +466,6 @@ export class RTCConnectionManager {
     peerConnection: RTCPeerConnection,
   ) {
     peerConnection.addEventListener('icecandidate', async (event) => {
-      console.log(
-        `[${peer}] local icecandidate:`,
-        event.candidate?.candidate ?? '(end of candidates)',
-      );
-
       if (event.candidate) {
         const message = new SignalingIceCandidate(
           peer,
@@ -619,8 +549,6 @@ export class RTCConnectionManager {
 
     const peer = message.senderId;
 
-    console.log(`[${peer}] remote icecandidate received:`, message.candidate);
-
     const peerConnection = this.peerConnections.get(peer);
 
     if (peerConnection == null) {
@@ -630,12 +558,7 @@ export class RTCConnectionManager {
       return;
     }
 
-    try {
-      await peerConnection.addIceCandidate(message.candidate);
-      console.log(`[${peer}] remote icecandidate added successfully.`);
-    } catch (error) {
-      console.error(`[${peer}] failed to add remote icecandidate:`, error);
-    }
+    await peerConnection.addIceCandidate(message.candidate);
   }
 
   private async handleError(message: SignalingError) {

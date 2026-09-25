@@ -21,9 +21,15 @@ import {
   SignalingRequestClientId,
 } from './signaling/messages';
 
-const RTCConfiguration = {
-  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-};
+interface IceServerConfig {
+  urls: string | string[];
+  username?: string;
+  credential?: string;
+}
+
+interface RTCConfig {
+  iceServers: IceServerConfig[];
+}
 
 export enum RTCEventType {
   ClientId,
@@ -50,6 +56,10 @@ export interface RTCEvent {
 export class RTCConnectionManager {
   private clientId: string | undefined;
   private peerList: string[] = [];
+
+  private rtcConfig: RTCConfig = {
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  };
 
   private peerConnections = new Map<string, RTCPeerConnection>();
   private connections = new Map<string, boolean>();
@@ -291,6 +301,14 @@ export class RTCConnectionManager {
 
     this.clientIdEventListeners.forEach((callback, id) => callback(event, id));
 
+    if (message.turnUrl != null) {
+      this.rtcConfig.iceServers.push({
+        urls: message.turnUrl,
+        username: message.turnUsername!,
+        credential: message.turnPassword!,
+      });
+    }
+
     console.log(`Client ID ${this.clientId} received.`);
   }
 
@@ -346,7 +364,7 @@ export class RTCConnectionManager {
       return;
     }
 
-    const peerConnection = new RTCPeerConnection(RTCConfiguration);
+    const peerConnection = new RTCPeerConnection(this.rtcConfig);
 
     this.peerConnections.set(peer, peerConnection);
     this.connections.set(peer, false);

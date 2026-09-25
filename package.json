@@ -1,6 +1,6 @@
 {
   "name": "openup",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "main": "./.erb/dll/main.bundle.dev.js",
   "desktopName": "OpenUp",

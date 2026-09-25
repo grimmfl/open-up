@@ -39,4 +39,7 @@ git push origin tag v0.2.2
 ```
 
 ### Deleting a tag
-```git push origin :refs/tags/v0.2.2```
+```
+git tag -d v0.2.2
+git push origin :refs/tags/v0.2.2
+```

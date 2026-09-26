@@ -34,12 +34,12 @@ The icons are taken from [Untitled UI](https://www.untitledui.com/icon/list).
 - Push
 - Create a tag
 ```
-git tag v0.2.2
-git push origin tag v0.2.2
+git tag v0.3.1
+git push origin tag v0.3.1
 ```
 
 ### Deleting a tag
 ```
-git tag -d v0.2.2
-git push origin :refs/tags/v0.2.2
+git tag -d v0.3.1
+git push origin :refs/tags/v0.3.1
 ```

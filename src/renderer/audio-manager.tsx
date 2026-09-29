@@ -15,6 +15,7 @@ interface UserAudio {
   cutoffGain: GainNode;
   gain: GainNode;
   dataArray: Uint8Array<ArrayBuffer>;
+  audioElement: HTMLAudioElement | null;
 }
 
 export default function AudioManager({ children }: { children: ReactElement }) {
@@ -35,6 +36,14 @@ export default function AudioManager({ children }: { children: ReactElement }) {
   );
 
   const [audioContext] = useState<AudioContext>(() => new AudioContext());
+
+  function clearAudio(audio: UserAudio) {
+    audio.source.disconnect();
+    audio.analyser.disconnect();
+    audio.gain.disconnect();
+    audio.cutoffGain.disconnect();
+    audio.audioElement?.remove();
+  }
 
   useEffect(() => {
     function getVolume(audio: UserAudio): number {
@@ -105,9 +114,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           const audio = audios.get(clientId!);
 
           if (audio != null) {
-            audio.source.disconnect();
-            audio.analyser.disconnect();
-            audio.gain.disconnect();
+            clearAudio(audio);
           }
 
           const source = audioContext.createMediaStreamSource(stream);
@@ -127,6 +134,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
             cutoffGain: audioContext.createGain(),
             gain,
             dataArray: new Uint8Array(analyser.frequencyBinCount),
+            audioElement: null,
           });
 
           return audios;
@@ -146,10 +154,13 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           const audio = audios.get(peer!);
 
           if (audio != null) {
-            audio.source.disconnect();
-            audio.analyser.disconnect();
-            audio.gain.disconnect();
+            clearAudio(audio);
           }
+
+          const el = new Audio();
+          el.muted = true;
+          el.srcObject = remoteStream!;
+          el.play();
 
           const source = audioContext.createMediaStreamSource(remoteStream!);
           const analyser = audioContext.createAnalyser();
@@ -172,6 +183,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
             cutoffGain,
             gain,
             dataArray: new Uint8Array(analyser.frequencyBinCount),
+            audioElement: el,
           });
 
           return audios;
@@ -186,9 +198,7 @@ export default function AudioManager({ children }: { children: ReactElement }) {
           const audio = audios.get(peer!);
 
           if (audio != null) {
-            audio.source.disconnect();
-            audio.analyser.disconnect();
-            audio.gain.disconnect();
+            clearAudio(audio);
           }
 
           return alterMapState(audios, (prev) => prev.delete(peer!));
@@ -222,12 +232,13 @@ export default function AudioManager({ children }: { children: ReactElement }) {
 
   useEffect(() => {
     setOutputAudios((audios) => {
-      audios.forEach((audio) =>
+      audios.forEach((audio, peer) => {
+        const peerData = peers.get(peer);
         audio.gain.gain.setValueAtTime(
-          isOutputMuted ? 0 : 1,
+          isOutputMuted ? 0 : Math.min(peerData?.volume ?? 100, 100) / 100,
           audioContext.currentTime,
-        ),
-      );
+        );
+      });
 
       return audios;
     });

@@ -219,10 +219,23 @@ const checkForManualUpdates = async () => {
   );
   const release = await response.json();
 
-  const latestVersion = release.tag_name.replace('v', '');
-  const currentVersion = app.getVersion();
+  const latestVersion = ((release.tag_name as string) ?? '0.0.0')
+    .replace('v', '')
+    .split('.')
+    .map((i) => parseInt(i, 10));
+  const currentVersion = app
+    .getVersion()
+    .split('.')
+    .map((i) => parseInt(i, 10));
 
-  if (latestVersion !== currentVersion) {
+  if (
+    latestVersion[0] > currentVersion[0] ||
+    (latestVersion[0] === currentVersion[0] &&
+      latestVersion[1] > currentVersion[1]) ||
+    (latestVersion[0] === currentVersion[0] &&
+      latestVersion[1] === currentVersion[1] &&
+      latestVersion[2] > currentVersion[2])
+  ) {
     mainWindow?.webContents.send('manual-update');
   }
 };
